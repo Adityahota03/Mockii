@@ -1,0 +1,18 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+
+# Media / Uploads
+backend/media/
+
+# Node
+frontend/node_modules/
+frontend/dist/

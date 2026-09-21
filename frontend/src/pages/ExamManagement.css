@@ -1,0 +1,241 @@
+.exam-management {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.exam-header {
+    margin-bottom: 25px;
+}
+
+.exam-header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.exam-header p,
+.exam-card-heading p {
+    color: #6b7280;
+}
+
+.exam-form-card,
+.exam-list-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 25px;
+}
+
+.exam-card-heading h2,
+.exam-list-header h2 {
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+.exam-card-heading p {
+    margin-top: 0;
+}
+
+.exam-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 18px;
+}
+
+.form-group {
+    display: block;
+    margin-bottom: 18px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.exam-search input,
+.exam-search select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 7px;
+    padding: 11px 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.exam-options {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    margin: 2px 0 22px;
+    color: #374151;
+    font-size: 14px;
+}
+
+.exam-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-actions,
+.exam-actions,
+.exam-search {
+    display: flex;
+    gap: 9px;
+}
+
+.primary-button,
+.secondary-button,
+.exam-search button,
+.exam-actions button {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.primary-button,
+.exam-search button {
+    background: #111827;
+    color: white;
+}
+
+.primary-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.secondary-button {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.exam-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.exam-list-header span {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.exam-search input,
+.exam-search select {
+    width: auto;
+    margin-top: 0;
+}
+
+.exam-search input {
+    min-width: 220px;
+}
+
+.exam-search select {
+    min-width: 125px;
+}
+
+.exam-table-wrapper {
+    overflow-x: auto;
+}
+
+.exam-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.exam-table th,
+.exam-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.exam-table th {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.exam-table td small {
+    display: block;
+    margin-top: 5px;
+    color: #9ca3af;
+}
+
+.exam-actions button {
+    border: 1px solid #d1d5db;
+    background: white;
+    padding: 7px 12px;
+}
+
+.exam-actions .delete-button {
+    color: #b91c1c;
+}
+
+.status-active,
+.status-inactive {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.exam-error {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow-wrap: anywhere;
+}
+
+.exam-empty {
+    padding: 40px;
+    text-align: center;
+    color: #6b7280;
+}
+
+@media (max-width: 850px) {
+    .exam-management {
+        padding: 18px;
+    }
+
+    .exam-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-list-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .exam-search {
+        flex-wrap: wrap;
+    }
+
+    .exam-search input {
+        flex: 1 1 180px;
+    }
+}

@@ -1,0 +1,116 @@
+.admin-dashboard {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-header {
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.admin-header p {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+.admin-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 35px;
+}
+
+.admin-stat-card,
+.admin-management-card,
+.admin-state {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+}
+
+.admin-stat-card {
+    padding: 24px;
+}
+
+.admin-stat-card span {
+    display: block;
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.admin-stat-card strong {
+    font-size: 30px;
+}
+
+.admin-section-header {
+    margin-bottom: 20px;
+}
+
+.admin-section-header h2 {
+    margin-bottom: 5px;
+}
+
+.admin-section-header p {
+    color: #6b7280;
+}
+
+.admin-management-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.admin-management-card {
+    display: block;
+    padding: 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-management-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.admin-management-card h3 {
+    margin-top: 0;
+}
+
+.admin-management-card p {
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.admin-state {
+    padding: 40px;
+    text-align: center;
+}
+
+.admin-error {
+    color: #b91c1c;
+}
+
+@media (max-width: 1000px) {
+    .admin-stat-grid,
+    .admin-management-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-dashboard {
+        padding: 18px;
+    }
+
+    .admin-stat-grid,
+    .admin-management-grid {
+        grid-template-columns: 1fr;
+    }
+}
