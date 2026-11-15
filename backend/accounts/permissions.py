@@ -54,3 +54,25 @@ class IsAdminOrSuperAdmin(BasePermission):
                 "SUPER_ADMIN"
             ]
         )
+
+
+class IsOwnerOrAdmin(BasePermission):
+    """
+    Allows access when the authenticated user owns the object
+    or is an ADMIN/SUPER_ADMIN.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.role in ["ADMIN", "SUPER_ADMIN"]:
+            return True
+
+        student = getattr(obj, "student", None)
+        if student:
+            return getattr(student, "id", None) == user.id
+
+        return getattr(obj, "student_id", None) == user.id

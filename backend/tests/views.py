@@ -2,7 +2,7 @@ from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import transaction
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Sum, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -12,6 +12,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import IsStudent
+from core.pagination import StandardPagination
+from core.throttles import (
+    TestAnswerRateThrottle,
+    TestSubmissionRateThrottle,
+)
 from content.models import (
     AttemptAnswer,
     MockTest,
@@ -389,18 +394,20 @@ class StudentSectionReviewAPIView(APIView):
         questions = MockTestQuestion.objects.filter(
             mock_test=attempt.mock_test,
             section_id=section_id
-        ).order_by("order")
+        ).select_related("question").prefetch_related("question__options").order_by("order")
         answers = AttemptAnswer.objects.filter(
             attempt=attempt,
             question_id__in=questions.values("question_id")
         )
         answer_map = {answer.question_id: answer for answer in answers}
         review = []
+        is_submitted = attempt.status in ("SUBMITTED", "EXPIRED")
+
         for question in questions:
             answer = answer_map.get(question.question_id)
             selected_option_id = answer.selected_option_id if answer else None
             marked = answer.is_marked_for_review if answer else False
-            review.append({
+            item_data = {
                 "question_id": question.question_id,
                 "question_order": question.order,
                 "status": "ANSWERED" if selected_option_id else (
@@ -408,7 +415,26 @@ class StudentSectionReviewAPIView(APIView):
                 ),
                 "selected_option_id": selected_option_id,
                 "marked_for_review": marked,
-            })
+            }
+            if is_submitted:
+                q_obj = question.question
+                correct_opt = q_obj.options.filter(is_correct=True).first()
+                item_data["question_text"] = q_obj.question_text
+                item_data["explanation"] = q_obj.explanation
+                item_data["options"] = [
+                    {
+                        "id": opt.id,
+                        "option_label": opt.option_label,
+                        "option_text": opt.option_text,
+                        "is_correct": opt.is_correct,
+                    }
+                    for opt in q_obj.options.all()
+                ]
+                item_data["is_correct"] = bool(
+                    selected_option_id and correct_opt and selected_option_id == correct_opt.id
+                )
+            review.append(item_data)
+
         return Response({
             "attempt_id": attempt.id,
             "section_id": section_attempt.section_id,
@@ -503,6 +529,8 @@ class SubmitTestSectionAPIView(APIView):
 
     permission_classes = [IsAuthenticated, IsStudent]
 
+    throttle_classes = [TestSubmissionRateThrottle]
+
     @transaction.atomic
     def post(self, request, attempt_id, section_id):
         attempt = get_object_or_404(
@@ -560,6 +588,8 @@ class SaveAnswerAPIView(APIView):
         IsAuthenticated,
         IsStudent,
     ]
+
+    throttle_classes = [TestAnswerRateThrottle]
 
     @transaction.atomic
     def post(self, request, attempt_id):
@@ -742,6 +772,8 @@ class SubmitTestAPIView(APIView):
         IsAuthenticated,
         IsStudent,
     ]
+
+    throttle_classes = [TestSubmissionRateThrottle]
 
     @transaction.atomic
     def post(self, request, attempt_id):
@@ -956,6 +988,18 @@ class SubmitTestAPIView(APIView):
         attempt.submitted_at = timezone.now()
         attempt.save()
 
+        try:
+            from accounts.services.notification_service import create_notification
+            create_notification(
+                user=request.user,
+                notification_type="RESULT",
+                title=f"Result Ready: {attempt.mock_test.title}",
+                message=f"You scored {attempt.total_score} marks ({attempt.percentage}%) with {attempt.accuracy}% accuracy.",
+                link=f"/test/{attempt.id}/result"
+            )
+        except Exception:
+            pass
+
         return Response(
             {
                 "message": "Test submitted successfully.",
@@ -968,6 +1012,8 @@ class SubmitTestAPIView(APIView):
 class FinalizeTestAttemptAPIView(APIView):
 
     permission_classes = [IsAuthenticated, IsStudent]
+
+    throttle_classes = [TestSubmissionRateThrottle]
 
     @transaction.atomic
     def post(self, request, attempt_id):
@@ -1008,9 +1054,36 @@ class MyAttemptsAPIView(APIView):
         attempts = (
             TestAttempt.objects
             .filter(student=request.user)
-            .select_related("mock_test")
-            .order_by("-started_at")
+            .select_related("mock_test", "mock_test__exam")
         )
+
+        status_param = request.query_params.get("status")
+        if status_param:
+            attempts = attempts.filter(status=status_param.upper())
+
+        exam_param = request.query_params.get("exam")
+        if exam_param:
+            if exam_param.isdigit():
+                attempts = attempts.filter(mock_test__exam_id=int(exam_param))
+            else:
+                attempts = attempts.filter(
+                    Q(mock_test__exam__slug=exam_param) | Q(mock_test__exam__name__iexact=exam_param)
+                )
+
+        search_param = request.query_params.get("search", "").strip()
+        if search_param:
+            attempts = attempts.filter(
+                Q(mock_test__title__icontains=search_param)
+                | Q(mock_test__exam__name__icontains=search_param)
+            )
+
+        attempts = attempts.order_by("-started_at")
+
+        paginator = StandardPagination()
+        page = paginator.paginate_queryset(attempts, request)
+        if page is not None:
+            serializer = TestHistorySerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
 
         serializer = TestHistorySerializer(
             attempts,

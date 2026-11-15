@@ -6,8 +6,18 @@ export const getAdminDashboard = () => {
 };
 
 
-export const getAdminExams = (params = {}) => {
-    return api.get("/content/admin/exams/", { params });
+export const getAdminExams = async (params = {}) => {
+    const response = await api.get("/content/admin/exams/", { params });
+    const data = response.data;
+    if (data && typeof data === "object" && !data.data) {
+        Object.defineProperty(data, "data", {
+            value: data,
+            writable: true,
+            configurable: true,
+            enumerable: false,
+        });
+    }
+    return data;
 };
 
 
@@ -31,8 +41,18 @@ export const deleteExam = (examId) => {
 };
 
 
-export const getAdminMockTests = (params = {}) => {
-    return api.get("/content/admin/mock-tests/", { params });
+export const getAdminMockTests = async (params = {}) => {
+    const response = await api.get("/content/admin/mock-tests/", { params });
+    const data = response.data;
+    if (data && typeof data === "object" && !data.data) {
+        Object.defineProperty(data, "data", {
+            value: data,
+            writable: true,
+            configurable: true,
+            enumerable: false,
+        });
+    }
+    return data;
 };
 
 
@@ -146,8 +166,18 @@ export const publishStudyMaterial = async (materialId) => {
 };
 
 
-export const getAdminQuestions = (params = {}) => {
-    return api.get("/content/admin/questions/", { params });
+export const getAdminQuestions = async (params = {}) => {
+    const response = await api.get("/content/admin/questions/", { params });
+    const data = response.data;
+    if (data && typeof data === "object" && !data.data) {
+        Object.defineProperty(data, "data", {
+            value: data,
+            writable: true,
+            configurable: true,
+            enumerable: false,
+        });
+    }
+    return data;
 };
 
 
@@ -227,10 +257,23 @@ export const getMockTestSections = (mockTestId) => {
 };
 
 
-export const getAdminSections = (mockTestId) => {
-    return api.get("/content/admin/sections/", {
-        params: { mock_test: mockTestId },
+export const getAdminSections = async (params = {}) => {
+    const queryParams = typeof params === "object" && params !== null
+        ? params
+        : { mock_test: params };
+    const response = await api.get("/content/admin/sections/", {
+        params: queryParams,
     });
+    const data = response.data;
+    if (data && typeof data === "object" && !data.data) {
+        Object.defineProperty(data, "data", {
+            value: data,
+            writable: true,
+            configurable: true,
+            enumerable: false,
+        });
+    }
+    return data;
 };
 
 
@@ -254,6 +297,13 @@ export const deleteSection = (sectionId) => {
 };
 
 
+export const reorderSections = (mockTestId, sectionIds) => {
+    return api.post(`/content/admin/mock-tests/${mockTestId}/sections/reorder/`, {
+        section_ids: sectionIds,
+    });
+};
+
+
 export const getAdminPreviousYearPapers = async (params = {}) => {
     const response = await api.get(
         "/content/admin/previous-year-papers/",
@@ -261,8 +311,16 @@ export const getAdminPreviousYearPapers = async (params = {}) => {
             params,
         }
     );
-
-    return response.data;
+    const data = response.data;
+    if (data && typeof data === "object" && !data.data) {
+        Object.defineProperty(data, "data", {
+            value: data,
+            writable: true,
+            configurable: true,
+            enumerable: false,
+        });
+    }
+    return data;
 };
 
 
@@ -335,4 +393,164 @@ export const getAdminStudent = async (studentId) => {
 
     return response.data;
 };
+
+
+export const updateStudentStatus = async (
+    studentId,
+    isActive
+) => {
+    const response = await api.patch(
+        `/auth/admin/students/${studentId}/status/`,
+        {
+            is_active: isActive,
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminReportsOverview = async () => {
+    const response = await api.get(
+        "/reports/overview/"
+    );
+
+    return response.data;
+};
+
+
+export const getAdminStudentReports = async (
+    days = 30
+) => {
+    const response = await api.get(
+        "/reports/students/",
+        {
+            params: {
+                days,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminExamReports = async (
+    days = 30
+) => {
+    const response = await api.get(
+        "/reports/exams/",
+        {
+            params: {
+                days,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminMockTestReports = async (
+    days = 30
+) => {
+    const response = await api.get(
+        "/reports/mock-tests/",
+        {
+            params: {
+                days,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminAttemptReports = async (
+    days = 30
+) => {
+    const response = await api.get(
+        "/reports/attempts/",
+        {
+            params: {
+                days,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminPerformanceReports = async (
+    days = 30
+) => {
+    const response = await api.get(
+        "/reports/performance/",
+        {
+            params: {
+                days,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminQuestionReports = async (
+    days = 30
+) => {
+    const response = await api.get(
+        "/reports/questions/",
+        {
+            params: {
+                days,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const getAdminContentReports = async () => {
+    const response = await api.get(
+        "/reports/content/"
+    );
+
+    return response.data;
+};
+
+
+export const exportAdminReportsCSV = async (days = 30) => {
+    const response = await api.get(
+        "/reports/export/csv/",
+        {
+            params: { days },
+            responseType: "blob",
+        }
+    );
+
+    return response.data;
+};
+
+
+export const exportAdminReportsExcel = async (days = 30) => {
+    const response = await api.get(
+        "/reports/export/excel/",
+        {
+            params: { days },
+            responseType: "blob",
+        }
+    );
+
+    return response.data;
+};
+
+
+
+
+
 

@@ -66,28 +66,16 @@ function ChangePassword() {
                 error.response?.data;
 
 
-            if (
-                data?.old_password
-            ) {
-
-                setError(
-                    data.old_password[0]
-                );
-
-            } else if (
-                data?.confirm_password
-            ) {
-
-                setError(
-                    data.confirm_password[0]
-                );
-
+            if (data?.old_password) {
+                setError(Array.isArray(data.old_password) ? data.old_password[0] : data.old_password);
+            } else if (data?.new_password) {
+                setError(Array.isArray(data.new_password) ? data.new_password[0] : data.new_password);
+            } else if (data?.confirm_password) {
+                setError(Array.isArray(data.confirm_password) ? data.confirm_password[0] : data.confirm_password);
+            } else if (data?.detail) {
+                setError(data.detail);
             } else {
-
-                setError(
-                    "Unable to change password."
-                );
-
+                setError("Unable to change password.");
             }
 
         }

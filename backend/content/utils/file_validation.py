@@ -85,6 +85,9 @@ def validate_study_material_file(uploaded_file):
             "Allowed: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and TXT."
         )
 
+    if uploaded_file.size <= 0:
+        raise ValidationError("Empty files are not allowed.")
+
     if uploaded_file.size > MAX_FILE_SIZE:
         raise ValidationError(
             "File size cannot exceed 20 MB."
@@ -94,9 +97,6 @@ def validate_study_material_file(uploaded_file):
 
     allowed_mimes = ALLOWED_FILE_TYPES[extension]["mime_types"]
 
-    # Some browsers may not provide a reliable content_type,
-    # so use the uploaded content type first and filename MIME
-    # as a secondary check.
     uploaded_mime = getattr(uploaded_file, "content_type", None)
 
     if uploaded_mime and uploaded_mime not in allowed_mimes:
@@ -109,7 +109,7 @@ def validate_study_material_file(uploaded_file):
             "File extension does not match its expected MIME type."
         )
 
-    # Signature validation where practical
+    # Signature validation
     expected_sig = ALLOWED_FILE_TYPES[extension].get("expected_signature")
     if expected_sig:
         detected_sig = detect_file_type(uploaded_file)
@@ -143,6 +143,9 @@ def validate_previous_year_paper_file(uploaded_file):
             "Only PDF files are allowed."
         )
 
+    if uploaded_file.size <= 0:
+        raise ValidationError("Empty files are not allowed.")
+
     max_size = 20 * 1024 * 1024
 
     if uploaded_file.size > max_size:
@@ -162,9 +165,9 @@ def validate_previous_year_paper_file(uploaded_file):
         )
 
     detected_sig = detect_file_type(uploaded_file)
-    if detected_sig and detected_sig != "application/pdf":
+    if detected_sig != "application/pdf":
         raise ValidationError(
-            "File content does not match PDF signature."
+            "The uploaded file is not a valid PDF."
         )
 
     return uploaded_file

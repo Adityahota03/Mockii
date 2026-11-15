@@ -22,6 +22,7 @@ from django.http import JsonResponse
 from accounts.views.admin_students import (
     AdminStudentListAPIView,
     AdminStudentDetailAPIView,
+    AdminStudentStatusAPIView,
 )
 
 
@@ -60,6 +61,21 @@ urlpatterns = [
     ),
 
     path(
+        "api/reports/",
+        include("reports.urls")
+    ),
+
+    path(
+        "api/notifications/",
+        include("accounts.notification_urls")
+    ),
+
+    path(
+        "api/superadmin/",
+        include("superadmin.urls")
+    ),
+
+    path(
         "api/admin/students/",
         include([
             path(
@@ -71,6 +87,11 @@ urlpatterns = [
                 "<int:student_id>/",
                 AdminStudentDetailAPIView.as_view(),
                 name="admin-student-detail-root"
+            ),
+            path(
+                "<int:student_id>/status/",
+                AdminStudentStatusAPIView.as_view(),
+                name="admin-student-status-root"
             ),
         ])
     ),

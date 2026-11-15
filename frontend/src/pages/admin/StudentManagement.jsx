@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getAdminStudents,
-  getAdminStudent,
+  updateStudentStatus,
 } from "../../api/adminApi";
+import Pagination from "../../components/common/Pagination";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
 import "./StudentManagement.css";
 
 
@@ -10,26 +13,47 @@ const PAGE_SIZE = 10;
 
 
 const StudentManagement = () => {
-  const [students, setStudents] = useState([]);
+  const navigate = useNavigate();
 
+  const [students, setStudents] = useState([]);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const [summary, setSummary] = useState({
+    total_students: 0,
+    active_students: 0,
+    inactive_students: 0,
+  });
+
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
 
-  const [currentPage, setCurrentPage] = useState(1);
-
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchInput]);
 
   const loadStudents = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const params = {};
+      const params = {
+        page,
+        page_size: pageSize,
+      };
 
       if (search.trim()) {
         params.search = search.trim();
@@ -41,125 +65,78 @@ const StudentManagement = () => {
 
       const data = await getAdminStudents(params);
 
-      /*
-       * Current backend Part 1 returns an array.
-       *
-       * Later Phase 6.10 will standardize server-side
-       * pagination across Admin APIs.
-       */
-      if (Array.isArray(data)) {
-        setStudents(data);
-      } else if (Array.isArray(data.results)) {
-        setStudents(data.results);
-      } else {
-        setStudents([]);
+      if (!data || !Array.isArray(data.results)) {
+        throw new Error("Invalid paginated API response.");
       }
 
-      setCurrentPage(1);
-
-    } catch (err) {
-      console.error(
-        "Failed to load students:",
-        err
+      setStudents(data.results);
+      setTotalStudents(Number(data.count) || 0);
+      setTotalPages(
+        Math.max(
+          1,
+          Math.ceil((Number(data.count) || 0) / pageSize)
+        )
       );
 
+      if (data.summary) {
+        setSummary(data.summary);
+      }
+    } catch (err) {
+      console.error("Failed to load students:", err);
       setError(
         err?.response?.data?.detail ||
         "Unable to load students."
       );
-
       setStudents([]);
-
+      setTotalStudents(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
     loadStudents();
-  }, [statusFilter]);
-
+  }, [page, pageSize, search, statusFilter]);
 
   const handleSearch = (event) => {
     event.preventDefault();
-    loadStudents();
+    setSearch(searchInput);
+    setPage(1);
   };
-
 
   const handleClearFilters = () => {
+    setSearchInput("");
     setSearch("");
     setStatusFilter("all");
-    setCurrentPage(1);
+    setPage(1);
   };
 
+  const [toggleDialog, setToggleDialog] = useState({
+    isOpen: false,
+    student: null,
+    loading: false,
+  });
 
-  const handleViewStudent = async (studentId) => {
+  const confirmToggleStatus = async () => {
+    if (!toggleDialog.student) return;
+    const nextStatus = !toggleDialog.student.is_active;
     try {
-      setDetailLoading(true);
+      setToggleDialog((prev) => ({ ...prev, loading: true }));
       setError("");
-
-      const data = await getAdminStudent(studentId);
-
-      setSelectedStudent(data);
-
+      await updateStudentStatus(toggleDialog.student.id, nextStatus);
+      setToggleDialog({ isOpen: false, student: null, loading: false });
+      await loadStudents();
     } catch (err) {
-      console.error(
-        "Failed to load student:",
-        err
-      );
-
+      console.error("Toggle student status error:", err);
       setError(
         err?.response?.data?.detail ||
-        "Unable to load student details."
+        err?.response?.data?.message ||
+        "Unable to update student status."
       );
-
-    } finally {
-      setDetailLoading(false);
+      setToggleDialog({ isOpen: false, student: null, loading: false });
     }
   };
-
-
-  const closeStudentModal = () => {
-    setSelectedStudent(null);
-  };
-
-
-  const statistics = useMemo(() => {
-    const total = students.length;
-
-    const active = students.filter(
-      (student) => student.is_active
-    ).length;
-
-    const inactive = students.filter(
-      (student) => !student.is_active
-    ).length;
-
-    return {
-      total,
-      active,
-      inactive,
-    };
-  }, [students]);
-
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(students.length / PAGE_SIZE)
-  );
-
-
-  const paginatedStudents = useMemo(() => {
-    const startIndex =
-      (currentPage - 1) * PAGE_SIZE;
-
-    return students.slice(
-      startIndex,
-      startIndex + PAGE_SIZE
-    );
-  }, [students, currentPage]);
-
 
   const formatDate = (dateValue) => {
     if (!dateValue) {
@@ -180,7 +157,7 @@ const StudentManagement = () => {
     <div className="student-management">
 
       {/* Header */}
-      <div className="student-page-header">
+      <div className="student-page-header student-management-header">
         <div>
           <h1>Student Management</h1>
 
@@ -191,7 +168,7 @@ const StudentManagement = () => {
         </div>
 
         <button
-          className="refresh-button"
+          className="refresh-button refresh-students-button"
           onClick={loadStudents}
           disabled={loading}
         >
@@ -201,37 +178,37 @@ const StudentManagement = () => {
 
 
       {/* Statistics */}
-      <div className="student-stat-grid">
+      <div className="student-stat-grid student-summary-grid">
 
-        <div className="student-stat-card">
+        <div className="student-stat-card student-summary-card">
           <div className="stat-card-label">
-            Total Students
+            <span>Total Students</span>
           </div>
 
           <div className="stat-card-value">
-            {statistics.total}
+            <strong>{summary.total_students}</strong>
           </div>
         </div>
 
 
-        <div className="student-stat-card">
+        <div className="student-stat-card student-summary-card">
           <div className="stat-card-label">
-            Active Students
+            <span>Active Students</span>
           </div>
 
           <div className="stat-card-value">
-            {statistics.active}
+            <strong>{summary.active_students}</strong>
           </div>
         </div>
 
 
-        <div className="student-stat-card">
+        <div className="student-stat-card student-summary-card">
           <div className="stat-card-label">
-            Inactive Students
+            <span>Inactive Students</span>
           </div>
 
           <div className="stat-card-value">
-            {statistics.inactive}
+            <strong>{summary.inactive_students}</strong>
           </div>
         </div>
 
@@ -239,7 +216,7 @@ const StudentManagement = () => {
 
 
       {/* Filters */}
-      <div className="student-filter-card">
+      <div className="student-filter-card student-filter-container">
 
         <form
           className="student-search-form"
@@ -247,10 +224,10 @@ const StudentManagement = () => {
         >
           <input
             type="text"
-            placeholder="Search by name, username or email..."
-            value={search}
+            placeholder="Search by name or email..."
+            value={searchInput}
             onChange={(event) =>
-              setSearch(event.target.value)
+              setSearchInput(event.target.value)
             }
           />
 
@@ -305,8 +282,7 @@ const StudentManagement = () => {
           <h2>Students</h2>
 
           <span>
-            {students.length} student
-            {students.length !== 1 ? "s" : ""}
+            {totalStudents} student{totalStudents !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -318,7 +294,7 @@ const StudentManagement = () => {
 
         ) : students.length === 0 ? (
 
-          <div className="student-empty">
+          <div className="student-empty students-empty-state">
             <h3>No students found</h3>
 
             <p>
@@ -328,9 +304,9 @@ const StudentManagement = () => {
 
         ) : (
 
-          <div className="table-wrapper">
+          <div className="table-wrapper students-table-wrapper">
 
-            <table className="student-table">
+            <table className="student-table students-table">
 
               <thead>
                 <tr>
@@ -347,18 +323,19 @@ const StudentManagement = () => {
 
               <tbody>
 
-                {paginatedStudents.map(
+                {students.map(
                   (student) => (
 
                     <tr key={student.id}>
 
                       <td>
-                        <div className="student-name-cell">
+                        <div className="student-name-cell student-table-profile">
 
                           <div className="student-avatar">
                             {(
                               student.full_name ||
                               student.username ||
+                              student.email ||
                               "S"
                             )
                               .charAt(0)
@@ -368,11 +345,12 @@ const StudentManagement = () => {
                           <div>
                             <strong>
                               {student.full_name ||
-                                student.username}
+                                student.username ||
+                                student.email}
                             </strong>
 
                             <small>
-                              @{student.username}
+                              {student.username ? `@${student.username}` : student.email}
                             </small>
                           </div>
 
@@ -422,18 +400,42 @@ const StudentManagement = () => {
 
 
                       <td>
-
-                        <button
-                          className="view-student-button"
-                          onClick={() =>
-                            handleViewStudent(
-                              student.id
-                            )
-                          }
-                        >
-                          View
-                        </button>
-
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                          <button
+                            className="view-student-button"
+                            onClick={() =>
+                              navigate(
+                                `/admin/students/${student.id}`
+                              )
+                            }
+                          >
+                            View
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              padding: "0.3rem 0.6rem",
+                              fontSize: "0.75rem",
+                              borderRadius: "6px",
+                              border: "1px solid",
+                              cursor: "pointer",
+                              background: "transparent",
+                              color: student.is_active ? "#f87171" : "#34d399",
+                              borderColor: student.is_active
+                                ? "rgba(239, 68, 68, 0.4)"
+                                : "rgba(16, 185, 129, 0.4)",
+                            }}
+                            onClick={() =>
+                              setToggleDialog({
+                                isOpen: true,
+                                student,
+                                loading: false,
+                              })
+                            }
+                          >
+                            {student.is_active ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
                       </td>
 
                     </tr>
@@ -450,177 +452,40 @@ const StudentManagement = () => {
       </div>
 
 
-      {/* Pagination */}
-      {students.length > PAGE_SIZE && (
-        <div className="student-pagination">
-
-          <button
-            disabled={currentPage === 1}
-            onClick={() =>
-              setCurrentPage(
-                (page) => page - 1
-              )
-            }
-          >
-            Previous
-          </button>
-
-
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-
-
-          <button
-            disabled={
-              currentPage === totalPages
-            }
-            onClick={() =>
-              setCurrentPage(
-                (page) => page + 1
-              )
-            }
-          >
-            Next
-          </button>
-
-        </div>
+      {/* Pagination Controls */}
+      {totalStudents > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={totalStudents}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          loading={loading}
+        />
       )}
 
-
-      {/* Student Detail Modal */}
-      {selectedStudent && (
-        <div
-          className="student-modal-overlay"
-          onClick={closeStudentModal}
-        >
-
-          <div
-            className="student-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
-          >
-
-            <div className="student-modal-header">
-
-              <h2>
-                Student Details
-              </h2>
-
-              <button
-                className="modal-close-button"
-                onClick={closeStudentModal}
-              >
-                ×
-              </button>
-
-            </div>
-
-
-            {detailLoading ? (
-
-              <div className="student-loading">
-                Loading student details...
-              </div>
-
-            ) : (
-
-              <div className="student-detail-content">
-
-                <div className="student-detail-avatar">
-                  {(
-                    selectedStudent.full_name ||
-                    selectedStudent.username ||
-                    "S"
-                  )
-                    .charAt(0)
-                    .toUpperCase()}
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Name</span>
-                  <strong>
-                    {selectedStudent.full_name ||
-                      "—"}
-                  </strong>
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Username</span>
-                  <strong>
-                    {selectedStudent.username ||
-                      "—"}
-                  </strong>
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Email</span>
-                  <strong>
-                    {selectedStudent.email ||
-                      "—"}
-                  </strong>
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Role</span>
-                  <strong>
-                    {selectedStudent.role}
-                  </strong>
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Account Status</span>
-
-                  <strong
-                    className={
-                      selectedStudent.is_active
-                        ? "detail-active"
-                        : "detail-inactive"
-                    }
-                  >
-                    {selectedStudent.is_active
-                      ? "Active"
-                      : "Inactive"}
-                  </strong>
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Joined</span>
-                  <strong>
-                    {formatDate(
-                      selectedStudent.date_joined
-                    )}
-                  </strong>
-                </div>
-
-
-                <div className="student-detail-row">
-                  <span>Last Login</span>
-                  <strong>
-                    {formatDate(
-                      selectedStudent.last_login
-                    )}
-                  </strong>
-                </div>
-
-              </div>
-            )}
-
-          </div>
-
-        </div>
-      )}
-
+      {/* Confirm Deactivation / Activation Dialog */}
+      <ConfirmDialog
+        isOpen={toggleDialog.isOpen}
+        title={toggleDialog.student?.is_active ? "Deactivate Student" : "Activate Student"}
+        message={
+          toggleDialog.student?.is_active
+            ? `Deactivate ${toggleDialog.student?.full_name || toggleDialog.student?.email}? They will be signed out and unable to log in until reactivated.`
+            : `Activate ${toggleDialog.student?.full_name || toggleDialog.student?.email}? This will restore their access to Mockii.`
+        }
+        confirmText={toggleDialog.student?.is_active ? "Deactivate" : "Activate"}
+        cancelText="Cancel"
+        isDestructive={toggleDialog.student?.is_active}
+        loading={toggleDialog.loading}
+        onConfirm={confirmToggleStatus}
+        onCancel={() =>
+          setToggleDialog({ isOpen: false, student: null, loading: false })
+        }
+      />
     </div>
   );
 };
 
-
 export default StudentManagement;
+

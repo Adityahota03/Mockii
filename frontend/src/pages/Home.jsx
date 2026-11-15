@@ -50,13 +50,13 @@ function Home() {
                 setError("");
 
                 const [
-                    categoriesData,
-                    examsData,
-                    featuredExamsData,
-                    mockTestsData,
-                    papersData,
-                    materialsData,
-                ] = await Promise.all([
+                    catRes,
+                    examRes,
+                    featRes,
+                    mockRes,
+                    paperRes,
+                    matRes,
+                ] = await Promise.allSettled([
                     getCategories(),
                     getExams(),
                     getFeaturedExams(),
@@ -65,12 +65,12 @@ function Home() {
                     getStudyMaterials(),
                 ]);
 
-                setCategories(categoriesData);
-                setExams(examsData);
-                setFeaturedExams(featuredExamsData);
-                setMockTests(mockTestsData);
-                setPreviousPapers(papersData);
-                setStudyMaterials(materialsData);
+                if (catRes.status === "fulfilled") setCategories(catRes.value || []);
+                if (examRes.status === "fulfilled") setExams(examRes.value || []);
+                if (featRes.status === "fulfilled") setFeaturedExams(featRes.value || []);
+                if (mockRes.status === "fulfilled") setMockTests(mockRes.value || []);
+                if (paperRes.status === "fulfilled") setPreviousPapers(paperRes.value || []);
+                if (matRes.status === "fulfilled") setStudyMaterials(matRes.value || []);
 
             } catch (err) {
 
@@ -97,6 +97,9 @@ function Home() {
     return (
 
         <div className="public-page">
+
+            {/* Spatial ambient background orbs */}
+            <div className="spatial-bg" aria-hidden="true"></div>
 
             <Navbar />
 

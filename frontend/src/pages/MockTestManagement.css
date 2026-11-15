@@ -28,7 +28,16 @@
 .secondary-button { background: #f3f4f6; }
 .mock-test-list-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 20px; }
 .mock-test-list-header h2 { margin: 0 0 5px; }
-.mock-test-search input { width: 260px; margin: 0; }
+.mock-test-search input, .mock-test-search select {
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.mock-test-search input { width: 220px; margin: 0; }
+.mock-test-search select { min-width: 130px; margin: 0; background: white; }
+
 .mock-test-table-wrapper { overflow-x: auto; }
 .mock-test-table { width: 100%; border-collapse: collapse; }
 .mock-test-table th, .mock-test-table td { padding: 15px; text-align: left; border-bottom: 1px solid #e5e7eb; }
@@ -36,7 +45,7 @@
 .mock-test-actions button { border: 1px solid #d1d5db; background: white; padding: 7px 12px; }
 .delete-button { color: #b91c1c; }
 .published-status, .draft-status { border: none; border-radius: 20px; padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.published-status { background: #dcfce7; }
+.published-status { background: #dcfce7; color: #166534; }
 .draft-status { background: #f3f4f6; color: #6b7280; }
 .mock-test-error { background: #fee2e2; color: #991b1b; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; }
 .mock-test-empty { padding: 40px; text-align: center; color: #6b7280; }
@@ -45,5 +54,6 @@
     .mock-test-management { padding: 18px; }
     .mock-test-form-grid { grid-template-columns: 1fr; }
     .mock-test-list-header { flex-direction: column; align-items: stretch; }
-    .mock-test-search input { width: 100%; }
+    .mock-test-search { flex-wrap: wrap; }
+    .mock-test-search input, .mock-test-search select { width: 100%; }
 }

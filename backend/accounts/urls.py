@@ -5,6 +5,11 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from core.throttles import (
+    LoginRateThrottle,
+    TokenRefreshRateThrottle,
+)
+
 from .views import (
     RegisterView,
     ProfileView,
@@ -12,9 +17,46 @@ from .views import (
     StudentOnlyView,
     AdminOnlyView,
     SuperAdminOnlyView,
+    LogoutAPIView,
     AdminStudentListAPIView,
     AdminStudentDetailAPIView,
+    AdminStudentStatusAPIView,
 )
+from .views.privileged_users import (
+    AdminUserListCreateAPIView,
+    AdminUserDetailAPIView,
+    AdminUserRoleAPIView,
+    AdminUserStatusAPIView,
+)
+
+
+import logging
+
+auth_logger = logging.getLogger("mockii.auth")
+
+
+# ---------------------------------------------------------------------------
+# Throttled wrappers — add only throttle_classes; keep all JWT logic intact.
+# ---------------------------------------------------------------------------
+
+class MockiiTokenObtainPairView(TokenObtainPairView):
+    """Login endpoint — IP-based brute-force protection + auth event logging."""
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email", "<not-provided>")
+        ip = request.META.get("HTTP_X_FORWARDED_FOR") or request.META.get("REMOTE_ADDR")
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            auth_logger.info("Login succeeded: email=%s ip=%s", email, ip)
+        else:
+            auth_logger.warning("Login failed: email=%s ip=%s status=%s", email, ip, response.status_code)
+        return response
+
+
+class MockiiTokenRefreshView(TokenRefreshView):
+    """Token-refresh endpoint — per-user throttle."""
+    throttle_classes = [TokenRefreshRateThrottle]
 
 
 urlpatterns = [
@@ -27,15 +69,22 @@ urlpatterns = [
 
     path(
         "login/",
-        TokenObtainPairView.as_view(),
+        MockiiTokenObtainPairView.as_view(),
         name="login"
     ),
 
     path(
+        "logout/",
+        LogoutAPIView.as_view(),
+        name="logout"
+    ),
+
+    path(
         "token/refresh/",
-        TokenRefreshView.as_view(),
+        MockiiTokenRefreshView.as_view(),
         name="token_refresh"
     ),
+
 
     path(
         "profile/",
@@ -77,5 +126,35 @@ urlpatterns = [
         "admin/students/<int:student_id>/",
         AdminStudentDetailAPIView.as_view(),
         name="admin-student-detail"
+    ),
+
+    path(
+        "admin/students/<int:student_id>/status/",
+        AdminStudentStatusAPIView.as_view(),
+        name="admin-student-status"
+    ),
+
+    path(
+        "admin/users/",
+        AdminUserListCreateAPIView.as_view(),
+        name="admin-user-list-create"
+    ),
+
+    path(
+        "admin/users/<int:user_id>/",
+        AdminUserDetailAPIView.as_view(),
+        name="admin-user-detail"
+    ),
+
+    path(
+        "admin/users/<int:user_id>/role/",
+        AdminUserRoleAPIView.as_view(),
+        name="admin-user-role"
+    ),
+
+    path(
+        "admin/users/<int:user_id>/status/",
+        AdminUserStatusAPIView.as_view(),
+        name="admin-user-status"
     ),
 ]

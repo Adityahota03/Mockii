@@ -1,11 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const { user } = useAuth();
 
     const closeMenu = () => {
         setMenuOpen(false);
+    };
+
+    const getDashboardPath = () => {
+        if (!user) return "/login";
+        if (user.role === "SUPER_ADMIN") return "/superadmin/dashboard";
+        if (user.role === "ADMIN") return "/admin/dashboard";
+        return "/student/dashboard";
     };
 
     return (
@@ -19,36 +28,46 @@ function Navbar() {
                     <div className="brand-text">
                         <div className="brand-name">Mockii</div>
                         <div className="brand-tagline">
-                            Your Preparation Partner
+                            Spatial Exam Preparation
                         </div>
                     </div>
                 </Link>
 
                 {/* Desktop Navigation */}
                 <div className="navbar-links">
-                    <a href="#exams">Exams</a>
-                    <a href="#features">Features</a>
-                    <a href="#mock-tests">Mock Tests</a>
-                    <Link to="/study-materials">Study Material</Link>
-                    <a href="#faq">FAQ</a>
+                    <Link to="/exams">Exams</Link>
+                    <Link to="/mock-tests">Mock Tests</Link>
+                    <Link to="/study-materials">Study Materials</Link>
+                    <Link to="/previous-papers">Previous Papers</Link>
+                    <a href="/#faq">FAQ</a>
                 </div>
 
                 {/* Desktop Buttons */}
                 <div className="navbar-actions">
-                    <Link to="/login" className="login-button">
-                        Login
-                    </Link>
+                    {user ? (
+                        <Link to={getDashboardPath()} className="register-button">
+                            Dashboard →
+                        </Link>
+                    ) : (
+                        <>
+                            <Link to="/login" className="login-button">
+                                Login
+                            </Link>
 
-                    <Link to="/register" className="register-button">
-                        Get Started
-                    </Link>
+                            <Link to="/register" className="register-button">
+                                Get Started
+                            </Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
                 <button
-                    className="mobile-menu-button"
+                    className={`mobile-menu-button${menuOpen ? " is-open" : ""}`}
                     onClick={() => setMenuOpen(!menuOpen)}
                     aria-label="Toggle navigation"
+                    aria-expanded={menuOpen}
+                    aria-controls="public-navigation"
                 >
                     <span></span>
                     <span></span>
@@ -57,44 +76,59 @@ function Navbar() {
             </div>
 
             {/* Mobile Navigation */}
-            <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
-
-                <a href="#exams" onClick={closeMenu}>
+            <div
+                id="public-navigation"
+                className={`mobile-menu ${menuOpen ? "open" : ""}`}
+            >
+                <Link to="/exams" onClick={closeMenu}>
                     Exams
-                </a>
-
-                <a href="#features" onClick={closeMenu}>
-                    Features
-                </a>
-
-                <a href="#mock-tests" onClick={closeMenu}>
-                    Mock Tests
-                </a>
-
-                <Link to="/study-materials" onClick={closeMenu}>
-                    Study Material
                 </Link>
 
-                <a href="#faq" onClick={closeMenu}>
+                <Link to="/mock-tests" onClick={closeMenu}>
+                    Mock Tests
+                </Link>
+
+                <Link to="/study-materials" onClick={closeMenu}>
+                    Study Materials
+                </Link>
+
+                <Link to="/previous-papers" onClick={closeMenu}>
+                    Previous Papers
+                </Link>
+
+                <a href="/#faq" onClick={closeMenu}>
                     FAQ
                 </a>
 
                 <div className="mobile-menu-actions">
-                    <Link
-                        to="/login"
-                        className="login-button"
-                        onClick={closeMenu}
-                    >
-                        Login
-                    </Link>
+                    {user ? (
+                        <Link
+                            to={getDashboardPath()}
+                            className="register-button"
+                            onClick={closeMenu}
+                            style={{ width: "100%", textAlign: "center" }}
+                        >
+                            Go to Dashboard →
+                        </Link>
+                    ) : (
+                        <>
+                            <Link
+                                to="/login"
+                                className="login-button"
+                                onClick={closeMenu}
+                            >
+                                Login
+                            </Link>
 
-                    <Link
-                        to="/register"
-                        className="register-button"
-                        onClick={closeMenu}
-                    >
-                        Get Started
-                    </Link>
+                            <Link
+                                to="/register"
+                                className="register-button"
+                                onClick={closeMenu}
+                            >
+                                Get Started
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>

@@ -1,6 +1,10 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+// Read base URL from Vite env so dev and prod never require code changes.
+// .env.development  → VITE_API_BASE_URL=http://127.0.0.1:8000/api
+// .env.production   → VITE_API_BASE_URL=https://api.mockii.example.com/api
+const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -9,6 +13,7 @@ const api = axios.create({
     },
 });
 
+// ── Request interceptor ───────────────────────────────────────────────────────
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("access_token");
@@ -17,6 +22,7 @@ api.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // Let the browser set the correct multipart boundary automatically.
         if (config.data instanceof FormData) {
             delete config.headers["Content-Type"];
         }
@@ -26,39 +32,90 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// ── Response interceptor ──────────────────────────────────────────────────────
+// Tracks whether a token-refresh is already in flight to prevent a loop
+// where two concurrent 401s both try to refresh simultaneously.
+let _isRefreshing = false;
+let _refreshQueue = [];
+
+function _processQueue(error, token = null) {
+    _refreshQueue.forEach((p) =>
+        error ? p.reject(error) : p.resolve(token)
+    );
+    _refreshQueue = [];
+}
+
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        const status = error.response?.status;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // ── 429 Too Many Requests ─────────────────────────────────────────
+        // Surface a typed error so UI components can show a friendly message
+        // ("You're doing that too fast — please wait a moment") rather than a
+        // generic network failure.
+        if (status === 429) {
+            const retryAfter = error.response.headers?.["retry-after"];
+            const rateLimitError = new Error("rate_limit_exceeded");
+            rateLimitError.retryAfter = retryAfter
+                ? parseInt(retryAfter, 10)
+                : null;
+            return Promise.reject(rateLimitError);
+        }
+
+        // ── 401 Unauthorized — attempt silent token refresh ───────────────
+        if (status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             const refreshToken = localStorage.getItem("refresh_token");
 
             if (!refreshToken) {
                 localStorage.removeItem("access_token");
-                localStorage.removeItem("refresh_token");
                 window.location.href = "/login";
                 return Promise.reject(error);
             }
 
+            // If a refresh is already in progress, queue this request.
+            if (_isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    _refreshQueue.push({ resolve, reject });
+                }).then((token) => {
+                    originalRequest.headers.Authorization = `Bearer ${token}`;
+                    return api(originalRequest);
+                });
+            }
+
+            _isRefreshing = true;
+
             try {
                 const response = await axios.post(
-                    "http://127.0.0.1:8000/api/auth/token/refresh/",
+                    `${API_BASE_URL}/auth/token/refresh/`,
                     { refresh: refreshToken }
                 );
 
                 const newAccessToken = response.data.access;
                 localStorage.setItem("access_token", newAccessToken);
+
+                // Store rotated refresh token if the server issued one.
+                if (response.data.refresh) {
+                    localStorage.setItem("refresh_token", response.data.refresh);
+                }
+
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                _processQueue(null, newAccessToken);
 
                 return api(originalRequest);
             } catch (refreshError) {
+                // Refresh itself failed (401 blacklisted, 429 rate-limited, etc.)
+                // — log out immediately without retrying.
+                _processQueue(refreshError, null);
                 localStorage.removeItem("access_token");
                 localStorage.removeItem("refresh_token");
                 window.location.href = "/login";
                 return Promise.reject(refreshError);
+            } finally {
+                _isRefreshing = false;
             }
         }
 

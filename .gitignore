@@ -16,3 +16,7 @@ backend/media/
 # Node
 frontend/node_modules/
 frontend/dist/
+
+# Collected static files
+backend/staticfiles/
+

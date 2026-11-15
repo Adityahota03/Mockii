@@ -1,10 +1,13 @@
 from django.db.models import Q
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from core.throttles import FileDownloadRateThrottle
 
 from ..models import PreviousYearPaper
 from ..serializers import StudentPreviousYearPaperSerializer
@@ -74,6 +77,7 @@ class StudentPreviousYearPaperDetailAPIView(APIView):
 
 class StudentPreviousYearPaperDownloadAPIView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [FileDownloadRateThrottle]
 
     def get(self, request, paper_id):
         paper = get_object_or_404(
@@ -88,6 +92,12 @@ class StudentPreviousYearPaperDownloadAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        if not paper.file.storage.exists(paper.file.name):
+            return Response(
+                {"detail": "File no longer exists."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         try:
             data = get_previous_year_paper_download_data(paper, request=request)
         except Exception:
@@ -95,5 +105,14 @@ class StudentPreviousYearPaperDownloadAPIView(APIView):
                 {"detail": "Unable to generate download URL."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+        if request.query_params.get("stream") == "true":
+            response = FileResponse(
+                paper.file.open("rb"),
+                content_type="application/pdf"
+            )
+            response["Content-Disposition"] = f'attachment; filename="mockii_previous_year_paper_{paper.id}.pdf"'
+            response["X-Content-Type-Options"] = "nosniff"
+            return response
 
         return Response(data, status=status.HTTP_200_OK)

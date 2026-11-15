@@ -28,3 +28,14 @@ export const getProfile = async () => {
 
     return response.data;
 };
+
+
+export const logoutUser = async (refreshToken) => {
+    try {
+        if (refreshToken) {
+            await api.post("auth/logout/", { refresh: refreshToken });
+        }
+    } catch (error) {
+        console.error("Backend logout error:", error);
+    }
+};

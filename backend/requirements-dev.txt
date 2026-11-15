@@ -1,0 +1,13 @@
+# =============================================================
+# requirements-dev.txt — Mockii development/CI-only dependencies
+# =============================================================
+# Install with:  pip install -r requirements-dev.txt
+# DO NOT install in production images.
+# =============================================================
+-r requirements.txt
+
+# Security auditing
+pip-audit==2.10.1
+
+# Secret scanning (install globally or in CI, NOT in venv)
+# detect-secrets==1.4.0

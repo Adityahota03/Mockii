@@ -1,4 +1,5 @@
 import Sidebar from "../components/Sidebar";
+import NotificationBell from "../components/NotificationBell";
 
 
 function StudentLayout({
@@ -17,12 +18,12 @@ function StudentLayout({
 
                 <header className="topbar">
 
-                    <div>
-                        Mockii
+                    <div className="topbar-brand">
+                        <span className="brand-dot"></span> Mockii Student Portal
                     </div>
 
-                    <div>
-                        🔔
+                    <div className="topbar-actions">
+                        <NotificationBell />
                     </div>
 
                 </header>

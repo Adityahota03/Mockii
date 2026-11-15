@@ -3,6 +3,11 @@ import {
 } from "react-router-dom";
 
 import {
+    useEffect,
+    useState
+} from "react";
+
+import {
     useAuth
 } from "../context/AuthContext";
 
@@ -14,6 +19,31 @@ function Sidebar({
     const { logout } =
         useAuth();
 
+    const [isOpen, setIsOpen] =
+        useState(false);
+
+    const closeSidebar = () => {
+        setIsOpen(false);
+    };
+
+    useEffect(() => {
+        const closeOnEscape = (event) => {
+            if (event.key === "Escape") {
+                closeSidebar();
+            }
+        };
+
+        if (isOpen) {
+            document.body.classList.add("navigation-open");
+            window.addEventListener("keydown", closeOnEscape);
+        }
+
+        return () => {
+            document.body.classList.remove("navigation-open");
+            window.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [isOpen]);
+
 
     const studentLinks = [
         {
@@ -21,24 +51,36 @@ function Sidebar({
             path: "/student/dashboard"
         },
         {
-            name: "My Tests",
-            path: "/student/attempts"
+            name: "All Exams",
+            path: "/student/exams"
         },
         {
             name: "Mock Tests",
             path: "/student/mock-tests"
         },
         {
+            name: "Test History",
+            path: "/student/history"
+        },
+        {
             name: "Performance",
             path: "/student/performance"
         },
         {
-            name: "Study Material",
+            name: "Study Materials",
             path: "/student/study-materials"
         },
         {
-            name: "Previous Year Papers",
+            name: "Previous Papers",
             path: "/student/previous-year-papers"
+        },
+        {
+            name: "Search Catalog",
+            path: "/student/search"
+        },
+        {
+            name: "Notifications",
+            path: "/student/notifications"
         },
         {
             name: "Profile",
@@ -47,10 +89,6 @@ function Sidebar({
         {
             name: "Change Password",
             path: "/student/change-password"
-        },
-        {
-            name: "Settings",
-            path: "/student/settings"
         }
     ];
 
@@ -61,24 +99,20 @@ function Sidebar({
             path: "/admin/dashboard"
         },
         {
-            name: "Students",
-            path: "/admin/students"
-        },
-        {
-            name: "Questions",
-            path: "/admin/questions"
+            name: "Exams",
+            path: "/admin/exams"
         },
         {
             name: "Mock Tests",
             path: "/admin/mock-tests"
         },
         {
-            name: "Users",
-            path: "/admin/users"
+            name: "Questions",
+            path: "/admin/questions"
         },
         {
-            name: "Results",
-            path: "/admin/results"
+            name: "Students",
+            path: "/admin/students"
         },
         {
             name: "Study Materials",
@@ -89,8 +123,8 @@ function Sidebar({
             path: "/admin/previous-year-papers"
         },
         {
-            name: "Settings",
-            path: "/admin/settings"
+            name: "Reports",
+            path: "/admin/reports"
         }
     ];
 
@@ -101,37 +135,69 @@ function Sidebar({
             path: "/super-admin/dashboard"
         },
         {
+            name: "Statistics",
+            path: "/super-admin/statistics"
+        },
+        {
+            name: "Manage Admins",
+            path: "/super-admin/admins"
+        },
+        {
+            name: "Super Admins",
+            path: "/super-admin/superadmins"
+        },
+        {
+            name: "All Users",
+            path: "/super-admin/users"
+        },
+        {
+            name: "Roles & Permissions",
+            path: "/super-admin/roles"
+        },
+        {
+            name: "System Config",
+            path: "/super-admin/system-config"
+        },
+        {
+            name: "Audit Logs",
+            path: "/super-admin/audit-logs"
+        },
+        {
+            name: "Security",
+            path: "/super-admin/security"
+        },
+        {
+            name: "Exams",
+            path: "/admin/exams"
+        },
+        {
+            name: "Mock Tests",
+            path: "/admin/mock-tests"
+        },
+        {
+            name: "Questions",
+            path: "/admin/questions"
+        },
+        {
             name: "Students",
             path: "/admin/students"
         },
         {
-            name: "Questions",
-            path: "/super-admin/questions"
+            name: "Study Materials",
+            path: "/admin/study-materials"
         },
         {
-            name: "Mock Tests",
-            path: "/super-admin/mock-tests"
+            name: "Previous Year Papers",
+            path: "/admin/previous-year-papers"
         },
         {
-            name: "Users",
-            path: "/super-admin/users"
+            name: "Reports",
+            path: "/admin/reports"
         },
         {
-            name: "Admins",
-            path: "/super-admin/admins"
+            name: "⚠️ Critical Controls",
+            path: "/super-admin/critical-controls"
         },
-        {
-            name: "Results",
-            path: "/super-admin/results"
-        },
-        {
-            name: "Analytics",
-            path: "/super-admin/analytics"
-        },
-        {
-            name: "Settings",
-            path: "/super-admin/settings"
-        }
     ];
 
 
@@ -153,7 +219,33 @@ function Sidebar({
 
     return (
 
-        <aside className="sidebar">
+        <>
+
+        <button
+            type="button"
+            className={`sidebar-mobile-trigger${isOpen ? " is-open" : ""}`}
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-controls="app-navigation"
+            aria-expanded={isOpen}
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <button
+            type="button"
+            className={`sidebar-backdrop${isOpen ? " is-visible" : ""}`}
+            onClick={closeSidebar}
+            aria-label="Close navigation menu"
+            tabIndex={isOpen ? 0 : -1}
+        />
+
+        <aside
+            id="app-navigation"
+            className={`sidebar${isOpen ? " is-open" : ""}`}
+        >
 
             <div className="sidebar-logo">
 
@@ -181,6 +273,7 @@ function Sidebar({
                     <NavLink
                         key={link.path}
                         to={link.path}
+                        onClick={closeSidebar}
                         className={({ isActive }) =>
                             isActive
                                 ? "sidebar-link active"
@@ -201,12 +294,17 @@ function Sidebar({
 
             <button
                 className="logout-button"
-                onClick={logout}
+                onClick={() => {
+                    closeSidebar();
+                    logout();
+                }}
             >
                 Logout
             </button>
 
         </aside>
+
+        </>
     );
 }
 

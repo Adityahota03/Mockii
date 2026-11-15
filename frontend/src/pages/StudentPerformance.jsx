@@ -20,6 +20,8 @@ import {
 
 import "./StudentPerformance.css";
 
+import { LoadingSpinner, ErrorState, EmptyState } from "../components/common/StateViews";
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -50,17 +52,18 @@ function StudentPerformance() {
                 await Promise.all([
                     getStudentPerformance(),
                     getSubjectPerformance(),
-                    getMyAttempts(),
+                    getMyAttempts({ page_size: 10 }),
                     getSectionPerformance(),
                 ]);
 
             setPerformance(performanceResponse?.data || performanceResponse);
-            setSubjects(subjectResponse?.data || subjectResponse);
-            setAttempts(attemptsResponse?.data || attemptsResponse);
-            setSectionPerformance(sectionResponse?.data || sectionResponse);
+            setSubjects(Array.isArray(subjectResponse) ? subjectResponse : subjectResponse?.data || []);
+            const attemptsData = attemptsResponse?.results || (Array.isArray(attemptsResponse) ? attemptsResponse : attemptsResponse?.data || []);
+            setAttempts(attemptsData);
+            setSectionPerformance(Array.isArray(sectionResponse) ? sectionResponse : sectionResponse?.data || []);
         } catch (err) {
             console.error(err);
-            setError("Unable to load performance data.");
+            setError(err.response?.data?.detail || "Unable to load performance data.");
         } finally {
             setLoading(false);
         }
@@ -69,7 +72,7 @@ function StudentPerformance() {
     if (loading) {
         return (
             <div className="performance-page">
-                <div className="performance-loading">Loading performance...</div>
+                <LoadingSpinner message="Calculating your performance analytics..." />
             </div>
         );
     }
@@ -77,7 +80,11 @@ function StudentPerformance() {
     if (error) {
         return (
             <div className="performance-page">
-                <div className="performance-error">{error}</div>
+                <ErrorState
+                    title="Unable to Load Performance"
+                    message={error}
+                    onRetry={loadPerformance}
+                />
             </div>
         );
     }
@@ -87,16 +94,15 @@ function StudentPerformance() {
             <div className="performance-page">
                 <div className="performance-header">
                     <h1>My Performance</h1>
-                    <p>Track your preparation and test performance.</p>
+                    <p>Track your preparation and test performance over time.</p>
                 </div>
 
-                <div className="empty-performance">
-                    <h2>No test attempts yet</h2>
-                    <p>
-                        Complete your first mock test to see your performance
-                        analytics.
-                    </p>
-                </div>
+                <EmptyState
+                    title="No Test Attempts Yet"
+                    message="Complete your first mock test to unlock comprehensive performance analytics, subject strengths, and score trends."
+                    actionLabel="Take a Mock Test"
+                    onAction={() => window.location.href = "/student/exams"}
+                />
             </div>
         );
     }
@@ -391,7 +397,7 @@ function StudentPerformance() {
                                         <td>{attempt.accuracy}%</td>
                                         <td>
                                             <Link
-                                                to={`/test/${attempt.id}/result`}
+                                                to={`/student/test-result/${attempt.id}`}
                                                 className="result-button"
                                             >
                                                 View Result

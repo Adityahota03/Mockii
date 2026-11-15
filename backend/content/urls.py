@@ -16,10 +16,15 @@ from .views import (
     AdminMoveQuestionToSectionAPIView,
     AdminSectionListCreateAPIView,
     AdminSectionDetailAPIView,
+    AdminMockTestSectionDetailAPIView,
+    AdminReorderSectionsAPIView,
     CategoryListAPIView,
     ExamListAPIView,
+    ExamDetailAPIView,
     FeaturedExamListAPIView,
     MockTestListAPIView,
+    MockTestDetailAPIView,
+    SearchAPIView,
     PreviousYearPaperListAPIView,
     StudyMaterialListAPIView,
     StudentStudyMaterialListAPIView,
@@ -150,6 +155,18 @@ urlpatterns = [
     ),
 
     path(
+        "admin/mock-tests/<int:mock_test_id>/sections/<int:section_id>/",
+        AdminMockTestSectionDetailAPIView.as_view(),
+        name="admin-mock-test-section-detail"
+    ),
+
+    path(
+        "admin/mock-tests/<int:mock_test_id>/sections/reorder/",
+        AdminReorderSectionsAPIView.as_view(),
+        name="admin-reorder-mock-test-sections"
+    ),
+
+    path(
         "admin/mock-tests/<int:mock_test_id>/questions/",
         AdminMockTestQuestionListAPIView.as_view(),
         name="admin-mock-test-question-list"
@@ -192,15 +209,33 @@ urlpatterns = [
     ),
 
     path(
+        "exams/<int:exam_id>/",
+        ExamDetailAPIView.as_view(),
+        name="exam-detail"
+    ),
+
+    path(
         "exams/featured/",
         FeaturedExamListAPIView.as_view(),
         name="featured-exam-list"
     ),
 
     path(
+        "search/",
+        SearchAPIView.as_view(),
+        name="unified-search"
+    ),
+
+    path(
         "mock-tests/",
         MockTestListAPIView.as_view(),
         name="mock-test-list"
+    ),
+
+    path(
+        "mock-tests/<int:mock_test_id>/",
+        MockTestDetailAPIView.as_view(),
+        name="mock-test-detail"
     ),
 
     path(

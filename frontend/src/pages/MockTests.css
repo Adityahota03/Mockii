@@ -1,0 +1,254 @@
+.mock-tests-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.tests-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tests-page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.tests-page-subtitle {
+  color: #64748b;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.tests-count-badge {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.tests-filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tests-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+}
+
+.tests-search-box .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.tests-search-box input {
+  width: 100%;
+  padding: 12px 38px 12px 40px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+  outline: none;
+  background: #ffffff;
+}
+
+.tests-search-box input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.tests-exam-select select {
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+}
+
+.tests-reset-btn {
+  padding: 11px 18px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tests-reset-btn:hover {
+  background: #e2e8f0;
+}
+
+.mock-tests-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .mock-tests-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mock-test-item-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.mock-test-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+
+.test-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.test-exam-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.status-pill.in_progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-pill.submitted {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.test-card-heading {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+}
+
+.test-card-snippet {
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  flex: 1;
+}
+
+.test-features-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.test-card-actions {
+  margin-top: auto;
+}
+
+.test-action-button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.test-action-button:hover {
+  background: #0369a1;
+}
+
+.test-action-button.resume {
+  background: #f59e0b;
+}
+
+.test-action-button.resume:hover {
+  background: #d97706;
+}
+
+.action-button-duo {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button-duo .test-action-button {
+  flex: 1;
+}
+
+.test-action-button.secondary {
+  background: #ffffff;
+  color: #0284c7;
+  border: 1px solid #0284c7;
+}
+
+.test-action-button.secondary:hover {
+  background: #f0f9ff;
+}
+
+.tests-pagination-box {
+  margin-top: 36px;
+  display: flex;
+  justify-content: center;
+}

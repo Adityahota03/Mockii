@@ -1,9 +1,11 @@
 import {
     BrowserRouter,
     Routes,
-    Route
+    Route,
+    Navigate
 } from "react-router-dom";
 
+import "./superadmin.css";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -38,6 +40,13 @@ import PreviousYearPaperManagement
 import StudentManagement
     from "./pages/admin/StudentManagement";
 
+import StudentDetail
+    from "./pages/admin/StudentDetail";
+
+import AdminReports
+    from "./pages/admin/AdminReports";
+
+
 
 import StudyMaterials
     from "./pages/StudyMaterials";
@@ -50,6 +59,34 @@ import PreviousYearPapers
 
 import SuperAdminDashboard
     from "./pages/SuperAdminDashboard";
+
+import AdminManagement
+    from "./pages/superadmin/AdminManagement";
+
+import SuperAdminManagement
+    from "./pages/superadmin/SuperAdminManagement";
+
+import UserManagement
+    from "./pages/superadmin/UserManagement";
+
+import RolesPermissions
+    from "./pages/superadmin/RolesPermissions";
+
+import SystemConfig
+    from "./pages/superadmin/SystemConfig";
+
+import AuditLogs
+    from "./pages/superadmin/AuditLogs";
+
+import SecurityMonitoring
+    from "./pages/superadmin/SecurityMonitoring";
+
+import Statistics
+    from "./pages/superadmin/Statistics";
+
+import CriticalControls
+    from "./pages/superadmin/CriticalControls";
+
 
 import Unauthorized
     from "./pages/Unauthorized";
@@ -81,6 +118,12 @@ import Home from "./pages/Home";
 import MockTest from "./pages/MockTest";
 import TestInstructions from "./pages/TestInstructions";
 import TestResult from "./pages/TestResult";
+import Exams from "./pages/Exams";
+import ExamDetails from "./pages/ExamDetails";
+import MockTests from "./pages/MockTests";
+import TestHistory from "./pages/TestHistory";
+import Search from "./pages/Search";
+import Notifications from "./pages/Notifications";
 
 function App() {
 
@@ -115,6 +158,26 @@ function App() {
             <Route
                 path="/previous-papers"
                 element={<PreviousYearPapers />}
+            />
+
+            <Route
+                path="/exams"
+                element={<Exams />}
+            />
+
+            <Route
+                path="/exams/:examId"
+                element={<ExamDetails />}
+            />
+
+            <Route
+                path="/mock-tests"
+                element={<MockTests />}
+            />
+
+            <Route
+                path="/search"
+                element={<Search />}
             />
 
                 {/* Authentication */}
@@ -278,7 +341,75 @@ function App() {
                 />
 
                 <Route
+                    path="/student/exams"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><Exams /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/student/exams/:examId"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><ExamDetails /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/student/mock-tests"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><MockTests /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/student/history"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><TestHistory /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/student/attempts"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><TestHistory /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/student/search"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><Search /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/student/notifications"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["STUDENT"]}>
+                            <StudentLayout><Notifications /></StudentLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
                     path="/test/instructions/:mockTestId"
+                    element={<TestInstructions />}
+                />
+
+                <Route
+                    path="/student/instructions/:mockTestId"
                     element={<TestInstructions />}
                 />
 
@@ -288,12 +419,37 @@ function App() {
                 />
 
                 <Route
+                    path="/student/mock-test/:attemptId"
+                    element={<MockTest />}
+                />
+
+                <Route
+                    path="/mock-test/:attemptId"
+                    element={<MockTest />}
+                />
+
+                <Route
                     path="/test/:attemptId/result"
+                    element={<TestResult />}
+                />
+
+                <Route
+                    path="/student/test-result/:attemptId"
+                    element={<TestResult />}
+                />
+
+                <Route
+                    path="/test-result/:attemptId"
                     element={<TestResult />}
                 />
 
 
                 {/* Admin */}
+
+                <Route
+                    path="/admin"
+                    element={<Navigate to="/admin/dashboard" replace />}
+                />
 
                 <Route
                     path="/admin/dashboard"
@@ -360,6 +516,38 @@ function App() {
                         >
                             <AdminLayout>
                                 <QuestionManagement />
+                            </AdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/questions"
+                    element={
+                        <RoleProtectedRoute
+                            allowedRoles={[
+                                "ADMIN",
+                                "SUPER_ADMIN"
+                            ]}
+                        >
+                            <AdminLayout>
+                                <QuestionManagement />
+                            </AdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/sections"
+                    element={
+                        <RoleProtectedRoute
+                            allowedRoles={[
+                                "ADMIN",
+                                "SUPER_ADMIN"
+                            ]}
+                        >
+                            <AdminLayout>
+                                <SectionManagement />
                             </AdminLayout>
                         </RoleProtectedRoute>
                     }
@@ -445,6 +633,39 @@ function App() {
                     }
                 />
 
+                <Route
+                    path="/admin/students/:studentId"
+                    element={
+                        <RoleProtectedRoute
+                            allowedRoles={[
+                                "ADMIN",
+                                "SUPER_ADMIN"
+                            ]}
+                        >
+                            <AdminLayout>
+                                <StudentDetail />
+                            </AdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/reports"
+                    element={
+                        <RoleProtectedRoute
+                            allowedRoles={[
+                                "ADMIN",
+                                "SUPER_ADMIN"
+                            ]}
+                        >
+                            <AdminLayout>
+                                <AdminReports />
+                            </AdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+
 
 
                 {/* Super Admin */}
@@ -470,8 +691,106 @@ function App() {
                     }
                 />
 
+                <Route
+                    path="/super-admin/admins"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <AdminManagement />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
 
-                {/* Default */}
+                <Route
+                    path="/super-admin/superadmins"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <SuperAdminManagement />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/users"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <UserManagement />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/roles"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <RolesPermissions />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/system-config"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <SystemConfig />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/audit-logs"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <AuditLogs />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/security"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <SecurityMonitoring />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/statistics"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <Statistics />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/super-admin/critical-controls"
+                    element={
+                        <RoleProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                            <SuperAdminLayout>
+                                <CriticalControls />
+                            </SuperAdminLayout>
+                        </RoleProtectedRoute>
+                    }
+                />
+
+
 
                 <Route
                     path="*"

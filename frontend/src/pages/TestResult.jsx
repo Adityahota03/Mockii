@@ -1,149 +1,341 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
 import api from "../api/api";
-import { getAttemptSectionResults } from "../api/testApi";
+import { getAttemptSectionResults, getSectionReview } from "../api/testApi";
+import { LoadingSpinner, ErrorState } from "../components/common/StateViews";
+import "./TestResult.css";
 
-function TestResult() {
-    const { attemptId } = useParams();
+export default function TestResult() {
+  const { attemptId } = useParams();
 
-    const [result, setResult] = useState(null);
-    const [sectionResults, setSectionResults] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+  const [sectionResults, setSectionResults] = useState([]);
+  const [reviewQuestions, setReviewQuestions] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("ALL"); // ALL | CORRECT | WRONG | UNANSWERED
+  const [loading, setLoading] = useState(true);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    useEffect(() => {
-        loadResult();
-    }, [attemptId]);
+  useEffect(() => {
+    let isMounted = true;
+    const fetchResults = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-    const loadResult = async () => {
+        let resData = null;
         try {
-            const response = await api.get(`/tests/attempts/${attemptId}/result/`);
-            setResult(response.data);
-            try {
-                setSectionResults(await getAttemptSectionResults(attemptId));
-            } catch (sectionError) {
-                console.error("Unable to load section results:", sectionError);
-            }
-        } catch (error) {
-            console.error(error);
-            setError(
-                error.response?.data?.detail || "Unable to load result."
-            );
-        } finally {
-            setLoading(false);
+          const response = await api.get(`/tests/attempts/${attemptId}/result/`);
+          resData = response.data;
+        } catch {
+          const fallback = await api.get(`/tests/my-attempts/${attemptId}/`);
+          resData = fallback.data;
         }
+
+        if (!isMounted) return;
+        setResult(resData);
+
+        // Fetch section results
+        let secList = [];
+        try {
+          secList = await getAttemptSectionResults(attemptId);
+        } catch {
+          secList = [];
+        }
+
+        if (!isMounted) return;
+        setSectionResults(secList || []);
+
+        // Load question reviews for all sections
+        if (secList && secList.length > 0) {
+          setReviewLoading(true);
+          const allReviewPromises = secList.map((sec) =>
+            getSectionReview(attemptId, sec.section || sec.section_id).catch(() => null)
+          );
+          const reviewResponses = await Promise.all(allReviewPromises);
+          if (!isMounted) return;
+
+          let combinedQuestions = [];
+          reviewResponses.forEach((rev) => {
+            if (rev?.questions) {
+              combinedQuestions = combinedQuestions.concat(rev.questions);
+            }
+          });
+          setReviewQuestions(combinedQuestions);
+          setReviewLoading(false);
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        console.error(err);
+        setError(err.response?.data?.detail || "Unable to load test result.");
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     };
 
-    if (loading) {
-        return <div className="result-loading">Loading result...</div>;
-    }
+    fetchResults();
 
-    if (error) {
-        return <div className="result-error">{error}</div>;
-    }
+    return () => {
+      isMounted = false;
+    };
+  }, [attemptId]);
 
-    if (!result) {
-        return null;
-    }
+  if (loading) {
+    return <LoadingSpinner message="Calculating and retrieving your test scores..." fullPage />;
+  }
 
+  if (error || !result) {
     return (
-        <div className="result-page">
-            <header className="result-header">
-                <div>
-                    <p className="result-label">Test Completed</p>
-                    <h1>{result.mock_test_title}</h1>
-                </div>
-
-                <Link to="/" className="dashboard-link">
-                    Dashboard
-                </Link>
-            </header>
-
-            <main className="result-container">
-                <section className="result-summary">
-                    <div className="score-card">
-                        <span>Total Score</span>
-                        <strong>{result.total_score}</strong>
-                        <small>{result.percentage}%</small>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Correct</span>
-                        <strong>{result.correct_answers}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Wrong</span>
-                        <strong>{result.wrong_answers}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Unanswered</span>
-                        <strong>{result.unanswered}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Accuracy</span>
-                        <strong>{result.accuracy}%</strong>
-                    </div>
-                </section>
-
-                <section className="section-performance">
-                    <div className="result-section-heading">
-                        <h2>Section-wise Performance</h2>
-                        <p>Review your performance in each section.</p>
-                    </div>
-
-                    <div className="section-result-grid">
-                        {(sectionResults.length > 0
-                            ? sectionResults
-                            : Object.entries(result.section_performance || {}).map(
-                                ([sectionName, section]) => ({
-                                    id: sectionName,
-                                    section_name: section.section_name || sectionName,
-                                    score: section.score,
-                                    correct_answers: section.correct,
-                                    wrong_answers: section.wrong,
-                                    unanswered: section.unanswered,
-                                    accuracy: section.accuracy,
-                                    percentage: section.percentage,
-                                })
-                            )
-                        ).map((section) => (
-                                <div className="section-result-card" key={section.id}>
-                                    <h3>{section.section_name}</h3>
-
-                                    <div className="section-score">
-                                        <strong>{section.score}</strong>
-                                        <span>Score</span>
-                                    </div>
-
-                                    <div className="section-result-stats">
-                                        <span>Correct: {section.correct_answers}</span>
-                                        <span>Wrong: {section.wrong_answers}</span>
-                                        <span>Unanswered: {section.unanswered}</span>
-                                        <span>Accuracy: {Number(section.accuracy || 0).toFixed(2)}%</span>
-                                        <span>Percentage: {Number(section.percentage || 0).toFixed(2)}%</span>
-                                    </div>
-                                </div>
-                            )
-                        )}
-                    </div>
-                </section>
-
-                <div className="result-actions">
-                    <Link to="/" className="primary-result-button">
-                        Back to Dashboard
-                    </Link>
-
-                    <Link to="/" className="secondary-result-button">
-                        Explore More Tests
-                    </Link>
-                </div>
-            </main>
+      <div style={{ maxWidth: 640, margin: "60px auto", padding: 20 }}>
+        <ErrorState
+          title="Could Not Load Result"
+          message={error || "Result data unavailable."}
+          onRetry={() => window.location.reload()}
+        />
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <Link to="/student/history" className="mockii-btn-secondary">
+            ← View My Test History
+          </Link>
         </div>
+      </div>
     );
-}
+  }
 
-export default TestResult;
+  // Filter questions for review
+  const filteredQuestions = reviewQuestions.filter((q) => {
+    if (activeFilter === "CORRECT") return q.is_correct === true;
+    if (activeFilter === "WRONG") return q.status === "ANSWERED" && q.is_correct === false;
+    if (activeFilter === "UNANSWERED") return q.status !== "ANSWERED";
+    return true; // ALL
+  });
+
+  return (
+    <div className="test-result-page">
+      {/* Top Banner */}
+      <div className="result-hero-banner">
+        <div className="result-hero-content">
+          <span className="result-complete-tag">✓ Assessment Complete</span>
+          <h1 className="result-test-title">
+            {result.mock_test_title || "Mock Test Results"}
+          </h1>
+          <p className="result-time-taken">
+            Submitted on {result.submitted_at ? new Date(result.submitted_at).toLocaleDateString() : "Today"}
+          </p>
+        </div>
+
+        <div className="result-hero-actions">
+          <Link to="/student/history" className="hero-action-btn secondary">
+            📋 Test History
+          </Link>
+          <Link to="/student/performance" className="hero-action-btn primary">
+            📊 Overall Analytics
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Score & Metrics Cards */}
+      <div className="result-metrics-grid">
+        <div className="metric-card score-main">
+          <span className="metric-label">Total Score</span>
+          <div className="metric-val-large">{result.total_score}</div>
+          <span className="metric-sub">{result.percentage}% Marks</span>
+        </div>
+
+        <div className="metric-card correct">
+          <span className="metric-icon">✓</span>
+          <div className="metric-val">{result.correct_answers}</div>
+          <span className="metric-label">Correct</span>
+        </div>
+
+        <div className="metric-card wrong">
+          <span className="metric-icon">✗</span>
+          <div className="metric-val">{result.wrong_answers}</div>
+          <span className="metric-label">Wrong</span>
+        </div>
+
+        <div className="metric-card unanswered">
+          <span className="metric-icon">○</span>
+          <div className="metric-val">{result.unanswered}</div>
+          <span className="metric-label">Unanswered</span>
+        </div>
+
+        <div className="metric-card accuracy">
+          <span className="metric-icon">🎯</span>
+          <div className="metric-val">{result.accuracy}%</div>
+          <span className="metric-label">Accuracy</span>
+        </div>
+      </div>
+
+      {/* Section-wise Performance */}
+      <div className="result-section-box">
+        <h2 className="section-title">Section-wise Breakdown</h2>
+
+        <div className="section-cards-grid">
+          {(sectionResults.length > 0
+            ? sectionResults
+            : Object.entries(result.section_performance || {}).map(([secId, sec]) => ({
+                id: secId,
+                section_name: sec.section_name || `Section ${secId}`,
+                score: sec.score,
+                correct_answers: sec.correct,
+                wrong_answers: sec.wrong,
+                unanswered: sec.unanswered,
+                accuracy: sec.accuracy,
+                percentage: sec.percentage,
+              }))
+          ).map((sec) => (
+            <div key={sec.id} className="section-perf-card">
+              <div className="sec-header">
+                <h3>{sec.section_name}</h3>
+                <span className="sec-score-tag">
+                  Score: <strong>{sec.score}</strong>
+                </span>
+              </div>
+
+              <div className="sec-stats-bar">
+                <span className="sec-stat-pill green">✓ {sec.correct_answers} Correct</span>
+                <span className="sec-stat-pill red">✗ {sec.wrong_answers} Wrong</span>
+                <span className="sec-stat-pill gray">○ {sec.unanswered} Skipped</span>
+              </div>
+
+              <div className="sec-footer-metrics">
+                <span>Accuracy: <strong>{Number(sec.accuracy || 0).toFixed(1)}%</strong></span>
+                <span>Percentage: <strong>{Number(sec.percentage || 0).toFixed(1)}%</strong></span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Detailed Question Review */}
+      <div className="result-section-box">
+        <div className="review-header-flex">
+          <div>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              Question-by-Question Review
+            </h2>
+            <p style={{ color: "#64748b", fontSize: "0.9rem", margin: "4px 0 0 0" }}>
+              Verify your answers, check correct solutions, and read detailed explanations.
+            </p>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="review-filters">
+            <button
+              className={`filter-btn ${activeFilter === "ALL" ? "active" : ""}`}
+              onClick={() => setActiveFilter("ALL")}
+            >
+              All ({reviewQuestions.length})
+            </button>
+            <button
+              className={`filter-btn green ${activeFilter === "CORRECT" ? "active" : ""}`}
+              onClick={() => setActiveFilter("CORRECT")}
+            >
+              ✓ Correct ({reviewQuestions.filter((q) => q.is_correct === true).length})
+            </button>
+            <button
+              className={`filter-btn red ${activeFilter === "WRONG" ? "active" : ""}`}
+              onClick={() => setActiveFilter("WRONG")}
+            >
+              ✗ Wrong ({reviewQuestions.filter((q) => q.status === "ANSWERED" && q.is_correct === false).length})
+            </button>
+            <button
+              className={`filter-btn gray ${activeFilter === "UNANSWERED" ? "active" : ""}`}
+              onClick={() => setActiveFilter("UNANSWERED")}
+            >
+              ○ Skipped ({reviewQuestions.filter((q) => q.status !== "ANSWERED").length})
+            </button>
+          </div>
+        </div>
+
+        {reviewLoading ? (
+          <LoadingSpinner message="Loading question answers and solutions..." />
+        ) : filteredQuestions.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px 20px", color: "#64748b" }}>
+            No questions found in this category.
+          </div>
+        ) : (
+          <div className="review-questions-list">
+            {filteredQuestions.map((q, idx) => (
+              <div
+                key={q.question_id || idx}
+                className={`review-question-card ${
+                  q.is_correct === true
+                    ? "status-correct"
+                    : q.status === "ANSWERED"
+                    ? "status-wrong"
+                    : "status-unanswered"
+                }`}
+              >
+                <div className="rev-card-top">
+                  <span className="q-num-badge">Question {q.question_order || idx + 1}</span>
+                  <span
+                    className={`q-status-badge ${
+                      q.is_correct === true
+                        ? "correct"
+                        : q.status === "ANSWERED"
+                        ? "wrong"
+                        : "skipped"
+                    }`}
+                  >
+                    {q.is_correct === true
+                      ? "✓ Correct"
+                      : q.status === "ANSWERED"
+                      ? "✗ Incorrect"
+                      : "○ Unanswered"}
+                  </span>
+                </div>
+
+                <div className="rev-question-text">
+                  <h3>{q.question_text || `Question #${q.question_order || idx + 1}`}</h3>
+                </div>
+
+                {/* Options display with correct/selected highlighting */}
+                {q.options && q.options.length > 0 && (
+                  <div className="rev-options-list">
+                    {q.options.map((opt) => {
+                      const isChosen = q.selected_option_id === opt.id;
+                      const isCorrect = opt.is_correct === true;
+
+                      let optClass = "rev-option";
+                      if (isCorrect) optClass += " correct-answer";
+                      if (isChosen && !isCorrect) optClass += " chosen-wrong";
+                      if (isChosen && isCorrect) optClass += " chosen-correct";
+
+                      return (
+                        <div key={opt.id} className={optClass}>
+                          <span className="opt-label">{opt.option_label}</span>
+                          <span className="opt-text">{opt.option_text}</span>
+                          {isChosen && <span className="opt-badge your-choice">Your Answer</span>}
+                          {isCorrect && <span className="opt-badge correct-choice">✓ Correct Option</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Explanation */}
+                {q.explanation && (
+                  <div className="rev-explanation-box">
+                    <strong>💡 Solution & Explanation:</strong>
+                    <p>{q.explanation}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="result-bottom-nav">
+        <Link to="/student/mock-tests" className="mockii-btn-primary">
+          Browse More Mock Tests →
+        </Link>
+        <Link to="/student/dashboard" className="mockii-btn-secondary">
+          Return to Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}

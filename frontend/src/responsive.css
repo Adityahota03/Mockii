@@ -1,0 +1,592 @@
+/* Shared responsive foundation for public, student, admin, and super-admin views. */
+/* Base colors come from spatial.css design tokens */
+
+:root {
+    --responsive-gutter: clamp(1rem, 3vw, 2rem);
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    min-width: 320px;
+    overflow-x: hidden;
+}
+
+body.navigation-open {
+    overflow: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    touch-action: manipulation;
+}
+
+:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.45);
+    outline-offset: 3px;
+}
+
+img,
+svg,
+video {
+    max-width: 100%;
+}
+
+.app-layout {
+    overflow-x: clip;
+}
+
+.main-content,
+.topbar-brand,
+.topbar-actions,
+.dashboard-page,
+.performance-page,
+.test-history-page,
+.search-page-container {
+    min-width: 0;
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.sidebar-mobile-trigger,
+.sidebar-backdrop {
+    display: none;
+}
+
+.table-wrapper,
+.exam-table-wrapper,
+.mock-test-table-wrapper,
+.question-table-wrapper,
+.section-table-wrapper,
+.history-table-wrapper,
+.history-table-container,
+.reports-table-wrapper,
+.sa-table-wrap {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+@media (max-width: 1100px) {
+    .hero-container {
+        gap: clamp(2rem, 5vw, 3.5rem);
+    }
+
+    .analytics-section,
+    .contact-container {
+        gap: clamp(2rem, 5vw, 3.5rem);
+    }
+
+    .exam-grid,
+    .feature-grid,
+    .why-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 950px) {
+    .mobile-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        display: flex;
+        visibility: hidden;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0.75rem 1rem 1rem;
+        border-top: 1px solid #e5e7eb;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 16px 28px rgba(15, 23, 42, 0.12);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-0.75rem);
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+    }
+
+    .mobile-menu.open {
+        display: flex;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+        transition-delay: 0s;
+    }
+
+    .mobile-menu-button.is-open span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .mobile-menu-button.is-open span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .mobile-menu-button.is-open span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+}
+
+@media (max-width: 900px) {
+    .app-layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: min(86vw, 21rem);
+        visibility: hidden;
+        transform: translateX(-105%);
+        transition: transform 0.28s ease, visibility 0s linear 0.28s;
+        z-index: 1150;
+        box-shadow: 16px 0 36px rgba(15, 23, 42, 0.22);
+    }
+
+    .sidebar.is-open {
+        visibility: visible;
+        transform: translateX(0);
+        transition-delay: 0s;
+    }
+
+    /* The legacy 70px sidebar hides its labels below 650px. The new drawer
+       stays wide, so keep all navigation content visible on phones. */
+    .sidebar-logo div:not(.logo-icon) {
+        display: block;
+    }
+
+    .sidebar-link span {
+        display: inline;
+    }
+
+    .logout-button {
+        font-size: inherit;
+    }
+
+    .logout-button::after {
+        content: none;
+    }
+
+    .sidebar-nav {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .sidebar-mobile-trigger {
+        position: fixed;
+        top: 13px;
+        left: 16px;
+        z-index: 1160;
+        display: inline-flex;
+        width: 42px;
+        height: 42px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 0;
+        border: 1px solid #dbe3ef;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #102a56;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        cursor: pointer;
+    }
+
+    .sidebar-mobile-trigger span {
+        width: 19px;
+        height: 2px;
+        border-radius: 999px;
+        background: currentColor;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .sidebar-mobile-trigger.is-open span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .sidebar-mobile-trigger.is-open span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .sidebar-mobile-trigger.is-open span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        visibility: hidden;
+        opacity: 0;
+        background: rgba(15, 23, 42, 0.48);
+        cursor: pointer;
+        pointer-events: none;
+        transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+    }
+
+    .sidebar-backdrop.is-visible {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transition-delay: 0s;
+    }
+
+    .main-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .topbar {
+        min-height: 68px;
+        height: auto;
+        padding: 0 1.5rem 0 4.5rem;
+    }
+
+    .stats-grid,
+    .performance-stats,
+    .student-stat-grid,
+    .question-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-page,
+    .performance-page,
+    .exam-management,
+    .mock-test-management,
+    .question-management,
+    .section-management,
+    .admin-dashboard-container,
+    .student-management,
+    .test-history-page,
+    .search-page-container,
+    .previous-paper-page,
+    .admin-reports-page {
+        padding-left: var(--responsive-gutter);
+        padding-right: var(--responsive-gutter);
+    }
+
+    .history-toolbar,
+    .student-filter-card,
+    .section-filters,
+    .question-filters,
+    .reports-toolbar,
+    .sa-table-toolbar {
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 780px) {
+    .hero-section {
+        padding: 4.5rem 0 4rem;
+    }
+
+    .analytics-section,
+    .contact-container,
+    .detail-main-grid,
+    .performance-charts,
+    .sa-two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .mock-test-preview,
+    .previous-paper-header,
+    .study-materials-heading,
+    .history-header,
+    .admin-header-row,
+    .student-page-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .mock-test-preview {
+        padding: 1.5rem;
+    }
+
+    .history-toolbar .search-box,
+    .history-toolbar .filter-group,
+    .student-search-form,
+    .question-search-form {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .filter-group,
+    .reports-toolbar-actions,
+    .student-filter-card,
+    .sa-table-toolbar--wrap {
+        flex-wrap: wrap;
+    }
+
+    .filter-select,
+    .question-filters select,
+    .section-filters input,
+    .section-filters select {
+        min-width: 0;
+        flex: 1 1 12rem;
+    }
+
+    .sa-card,
+    .reports-section,
+    .dashboard-section,
+    .profile-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .sidebar {
+        width: min(88vw, 20rem);
+    }
+
+    .topbar {
+        min-height: 64px;
+        padding: 0 1rem 0 4.25rem;
+    }
+
+    .topbar-brand {
+        overflow: hidden;
+        font-size: 0.9rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .topbar-user,
+    .role-pill {
+        display: none;
+    }
+
+    .dashboard-page,
+    .performance-page,
+    .exam-management,
+    .mock-test-management,
+    .question-management,
+    .section-management,
+    .admin-dashboard-container,
+    .student-management,
+    .test-history-page,
+    .search-page-container,
+    .previous-paper-page,
+    .admin-reports-page {
+        padding-top: 1.25rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .dashboard-header,
+    .performance-header,
+    .history-header,
+    .search-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-header h1,
+    .performance-header h1,
+    .history-title,
+    .search-title,
+    .exam-header h1,
+    .mock-test-header h1,
+    .question-page-header h1,
+    .section-header h1 {
+        font-size: clamp(1.55rem, 7vw, 2rem);
+    }
+
+    .stats-grid,
+    .performance-stats,
+    .student-stat-grid,
+    .question-summary,
+    .preparation-grid,
+    .subject-grid,
+    .weak-subject-grid,
+    .exam-grid,
+    .feature-grid,
+    .why-grid,
+    .paper-grid,
+    .material-grid,
+    .study-material-grid,
+    .previous-paper-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card,
+    .performance-stat-card,
+    .dashboard-section,
+    .profile-card,
+    .exam-form-card,
+    .exam-list-card,
+    .mock-test-form-card,
+    .mock-test-list-card {
+        padding: 1rem;
+    }
+
+    .test-row,
+    .student-detail-row,
+    .file-info-list .info-item,
+    .report-card {
+        gap: 0.5rem;
+    }
+
+    .auth-page {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .auth-card {
+        margin: 1rem 0;
+        padding: 1.75rem 1.25rem;
+        border-radius: 12px;
+    }
+
+    .public-navbar {
+        min-height: 68px;
+    }
+
+    .hero-section {
+        padding: 3.75rem 0;
+    }
+
+    .hero-trust {
+        display: grid;
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .trust-divider {
+        display: none;
+    }
+
+    .trust-item {
+        min-width: 0;
+    }
+
+    .trust-item span {
+        line-height: 1.35;
+    }
+
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-bottom,
+    .footer-bottom div,
+    .form-actions,
+    .history-toolbar,
+    .reports-toolbar-actions,
+    .pagination-navigation,
+    .common-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .history-toolbar .filter-group,
+    .student-search-form,
+    .question-search-form,
+    .reports-toolbar-actions,
+    .form-actions,
+    .pagination-navigation {
+        width: 100%;
+    }
+
+    .history-toolbar .filter-select,
+    .student-filter-card select,
+    .student-search-form button,
+    .question-search-form button,
+    .form-actions button,
+    .reports-toolbar-actions button {
+        width: 100%;
+    }
+
+    .table-wrapper table,
+    .exam-table,
+    .mock-test-table,
+    .question-table,
+    .section-table,
+    .history-table,
+    .reports-table,
+    .sa-table {
+        min-width: 40rem;
+    }
+
+    .modal-overlay,
+    .section-modal-overlay,
+    .student-modal-overlay,
+    .sa-modal-overlay,
+    .confirm-dialog-backdrop {
+        padding: 0.75rem;
+    }
+
+    .modal-container,
+    .section-modal,
+    .student-modal,
+    .sa-modal,
+    .confirm-dialog-modal {
+        max-height: calc(100vh - 1.5rem);
+    }
+}
+
+@keyframes responsive-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .public-page .hero-content,
+    .public-page .hero-visual,
+    .main-content > :not(.topbar) {
+        animation: responsive-enter 0.45s ease-out both;
+    }
+
+    .public-page .hero-visual {
+        animation-delay: 0.1s;
+    }
+
+    .public-page .primary-button,
+    .public-page .secondary-button,
+    .public-page .exam-card,
+    .public-page .feature-card,
+    .stat-card,
+    .dashboard-section {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

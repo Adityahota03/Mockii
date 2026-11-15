@@ -7,6 +7,8 @@ import {
     updateExam,
 } from "../api/adminApi";
 import { getCategories } from "../api/api";
+import Pagination from "../components/common/Pagination";
+import ConfirmDialog from "../components/common/ConfirmDialog";
 
 import "./ExamManagement.css";
 
@@ -28,32 +30,93 @@ function ExamManagement() {
     const [categories, setCategories] = useState([]);
     const [form, setForm] = useState(emptyForm);
     const [editingId, setEditingId] = useState(null);
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalExams, setTotalExams] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+
+    const [searchInput, setSearchInput] = useState("");
     const [search, setSearch] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("");
     const [activeFilter, setActiveFilter] = useState("");
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
-    const loadExams = async (params = { search, is_active: activeFilter }) => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearch(searchInput);
+            setPage(1);
+        }, 300);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [searchInput]);
+
+    const loadExams = async () => {
         try {
             setLoading(true);
             setError("");
-            const response = await getAdminExams(params);
-            setExams(response.data);
+
+            const params = {
+                page,
+                page_size: pageSize,
+                search: search.trim(),
+                category: categoryFilter,
+                is_active: activeFilter,
+            };
+
+            const data = await getAdminExams(params);
+
+            if (!data || !Array.isArray(data.results)) {
+                throw new Error("Invalid paginated API response.");
+            }
+
+            setExams(data.results);
+            setTotalExams(Number(data.count) || 0);
+            setTotalPages(
+                Math.max(
+                    1,
+                    Math.ceil((Number(data.count) || 0) / pageSize)
+                )
+            );
         } catch (loadError) {
             console.error(loadError);
             setError("Unable to load exams.");
+            setExams([]);
+            setTotalExams(0);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadExams();
         getCategories()
             .then(setCategories)
             .catch((loadError) => console.error(loadError));
     }, []);
+
+    useEffect(() => {
+        loadExams();
+    }, [page, pageSize, search, categoryFilter, activeFilter]);
+
+    const handleSearchSubmit = (event) => {
+        event.preventDefault();
+        setSearch(searchInput);
+        setPage(1);
+    };
+
+    const clearFilters = () => {
+        setSearchInput("");
+        setSearch("");
+        setCategoryFilter("");
+        setActiveFilter("");
+        setPage(1);
+    };
 
     const handleChange = (event) => {
         const { name, value, type, checked } = event.target;
@@ -112,18 +175,39 @@ function ExamManagement() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const handleDelete = async (examId) => {
-        if (!window.confirm("Delete this exam?")) {
-            return;
-        }
+    const [deleteDialog, setDeleteDialog] = useState({
+        isOpen: false,
+        exam: null,
+        loading: false,
+    });
 
+    const handleToggleStatus = async (exam) => {
         try {
             setError("");
-            await deleteExam(examId);
+            await updateExam(exam.id, { is_active: !exam.is_active });
+            await loadExams();
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data?.detail || "Unable to update exam status.");
+        }
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.exam) return;
+        try {
+            setDeleteDialog((prev) => ({ ...prev, loading: true }));
+            setError("");
+            await deleteExam(deleteDialog.exam.id);
+            setDeleteDialog({ isOpen: false, exam: null, loading: false });
             await loadExams();
         } catch (deleteError) {
             console.error(deleteError);
-            setError("Unable to delete exam.");
+            const msg =
+                deleteError.response?.data?.message ||
+                deleteError.response?.data?.detail ||
+                "Unable to delete exam. Deactivate the exam instead to preserve history.";
+            setError(msg);
+            setDeleteDialog({ isOpen: false, exam: null, loading: false });
         }
     };
 
@@ -266,33 +350,47 @@ function ExamManagement() {
                 <div className="exam-list-header">
                     <div>
                         <h2>All Exams</h2>
-                        <span>{exams.length} exams</span>
+                        <span>{totalExams} exam{totalExams !== 1 ? "s" : ""}</span>
                     </div>
-                    <div className="exam-search">
+                    <form className="exam-search" onSubmit={handleSearchSubmit}>
                         <input
                             type="search"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            onKeyDown={(event) => {
-                                if (event.key === "Enter") loadExams();
-                            }}
-                            placeholder="Search exams"
+                            value={searchInput}
+                            onChange={(event) => setSearchInput(event.target.value)}
+                            placeholder="Search exams..."
                         />
                         <select
+                            value={categoryFilter}
+                            onChange={(event) => setCategoryFilter(event.target.value)}
+                        >
+                            <option value="">All categories</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.name}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                        <select
                             value={activeFilter}
-                            onChange={(event) => {
-                                setActiveFilter(event.target.value);
-                                loadExams({ search, is_active: event.target.value });
-                            }}
+                            onChange={(event) => setActiveFilter(event.target.value)}
                         >
                             <option value="">All statuses</option>
                             <option value="true">Active</option>
                             <option value="false">Inactive</option>
                         </select>
-                        <button type="button" onClick={() => loadExams()}>
+                        <button type="submit">
                             Search
                         </button>
-                    </div>
+                        {(search || categoryFilter || activeFilter) && (
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={clearFilters}
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </form>
                 </div>
 
                 {loading ? (
@@ -300,48 +398,94 @@ function ExamManagement() {
                 ) : exams.length === 0 ? (
                     <div className="exam-empty">No exams found.</div>
                 ) : (
-                    <div className="exam-table-wrapper">
-                        <table className="exam-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Content</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {exams.map((exam) => (
-                                    <tr key={exam.id}>
-                                        <td>
-                                            <strong>{exam.name}</strong>
-                                            <small>{exam.slug}</small>
-                                        </td>
-                                        <td>{exam.category_name}</td>
-                                        <td>{exam.total_mock_tests} tests / {exam.total_questions} questions</td>
-                                        <td>
-                                            <span className={exam.is_active ? "status-active" : "status-inactive"}>
-                                                {exam.is_active ? "Active" : "Inactive"}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="exam-actions">
-                                                <button type="button" onClick={() => handleEdit(exam)}>
-                                                    Edit
-                                                </button>
-                                                <button type="button" className="delete-button" onClick={() => handleDelete(exam.id)}>
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
+                    <>
+                        <div className="exam-table-wrapper">
+                            <table className="exam-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Content</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {exams.map((exam) => (
+                                        <tr key={exam.id}>
+                                            <td>
+                                                <strong>{exam.name}</strong>
+                                                <small>{exam.slug}</small>
+                                            </td>
+                                            <td>{exam.category_name}</td>
+                                            <td>{exam.total_mock_tests} tests / {exam.total_questions} questions</td>
+                                            <td>
+                                                <span className={exam.is_active ? "status-active" : "status-inactive"}>
+                                                    {exam.is_active ? "Active" : "Inactive"}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="exam-actions">
+                                                    <button
+                                                        type="button"
+                                                        className={exam.is_active ? "secondary-button" : "primary-button"}
+                                                        onClick={() => handleToggleStatus(exam)}
+                                                        title={exam.is_active ? "Deactivate exam" : "Activate exam"}
+                                                    >
+                                                        {exam.is_active ? "Deactivate" : "Activate"}
+                                                    </button>
+                                                    <button type="button" onClick={() => handleEdit(exam)}>
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="delete-button"
+                                                        onClick={() =>
+                                                            setDeleteDialog({
+                                                                isOpen: true,
+                                                                exam,
+                                                                loading: false,
+                                                            })
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {totalExams > 0 && (
+                            <Pagination
+                                page={page}
+                                totalPages={totalPages}
+                                pageSize={pageSize}
+                                totalItems={totalExams}
+                                onPageChange={setPage}
+                                onPageSizeChange={setPageSize}
+                                loading={loading}
+                            />
+                        )}
+                    </>
                 )}
             </section>
+
+            <ConfirmDialog
+                isOpen={deleteDialog.isOpen}
+                title="Delete Examination"
+                message={`Are you sure you want to permanently delete "${deleteDialog.exam?.name}"? If this exam has mock tests, study materials, or papers, deletion will be blocked and deactivation is recommended.`}
+                confirmText="Delete Exam"
+                cancelText="Cancel"
+                isDestructive={true}
+                loading={deleteDialog.loading}
+                onConfirm={confirmDelete}
+                onCancel={() =>
+                    setDeleteDialog({ isOpen: false, exam: null, loading: false })
+                }
+            />
         </div>
     );
 }

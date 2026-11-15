@@ -487,3 +487,181 @@ class StudentPreviousYearPaperApiTests(APITestCase):
         draft_dl_url = reverse("previous-year-paper-download", kwargs={"paper_id": self.draft_paper.id})
         res_draft = self.client.get(draft_dl_url)
         self.assertEqual(res_draft.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class AdminPreviousYearPaperPaginationAndFilterTests(APITestCase):
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            email="admin_pyp_pag@mockii.com",
+            password="adminpassword123",
+            role=User.Roles.ADMIN,
+        )
+        self.super_admin = User.objects.create_user(
+            email="super_pyp_pag@mockii.com",
+            password="superpassword123",
+            role=User.Roles.SUPER_ADMIN,
+        )
+        self.student = User.objects.create_user(
+            email="student_pyp_pag@mockii.com",
+            password="studentpassword123",
+            role=User.Roles.STUDENT,
+        )
+
+        self.category = ExamCategory.objects.create(
+            name="Civil Services",
+            slug="civil-services-pyp",
+        )
+        self.exam_upsc = Exam.objects.create(
+            category=self.category,
+            name="UPSC CSE",
+            slug="upsc-cse-pyp",
+            is_active=True,
+        )
+        self.exam_state = Exam.objects.create(
+            category=self.category,
+            name="State PSC",
+            slug="state-psc-pyp",
+            is_active=True,
+        )
+
+        # Create 12 papers for exam_upsc
+        self.upsc_papers = []
+        for i in range(12):
+            paper = PreviousYearPaper.objects.create(
+                exam=self.exam_upsc,
+                title=f"UPSC Prelims General Studies {i:02d}" if i == 0 else f"Paper {i:02d}",
+                description="Comprehensive general studies paper" if i == 0 else f"Description {i:02d}",
+                year=2024 if i < 6 else 2023,
+                category="General Studies" if i < 6 else "CSAT",
+                paper_type="QUESTION_PAPER" if i < 8 else "ANSWER_KEY",
+                is_published=(i % 2 == 0),
+            )
+            self.upsc_papers.append(paper)
+
+        # Create 3 papers for exam_state
+        self.state_papers = []
+        for i in range(3):
+            paper = PreviousYearPaper.objects.create(
+                exam=self.exam_state,
+                title=f"State PSC Prelims {i:02d}",
+                description=f"State PSC test {i:02d}",
+                year=2022,
+                category="State GS",
+                paper_type="SOLUTION",
+                is_published=True,
+            )
+            self.state_papers.append(paper)
+
+        # Total papers = 15
+        self.list_url = "/api/content/admin/previous-year-papers/"
+
+    def test_student_forbidden(self):
+        self.client.force_authenticate(user=self.student)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_and_super_admin_allowed(self):
+        self.client.force_authenticate(user=self.admin)
+        res_admin = self.client.get(self.list_url)
+        self.assertEqual(res_admin.status_code, status.HTTP_200_OK)
+
+        self.client.force_authenticate(user=self.super_admin)
+        res_super = self.client.get(self.list_url)
+        self.assertEqual(res_super.status_code, status.HTTP_200_OK)
+
+    def test_default_pagination(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
+        self.assertEqual(data["count"], 15)
+        self.assertEqual(len(data["results"]), 10)
+        self.assertIsNotNone(data["next"])
+        self.assertIsNone(data["previous"])
+
+        # Page 2
+        response_page2 = self.client.get(f"{self.list_url}?page=2")
+        self.assertEqual(response_page2.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_page2.data["results"]), 5)
+
+    def test_page_size_and_max_page_size(self):
+        self.client.force_authenticate(user=self.admin)
+        # page_size=20 should return all 15
+        response = self.client.get(f"{self.list_url}?page_size=20")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 15)
+
+        # page_size=100 should be capped at max_page_size (50)
+        response_capped = self.client.get(f"{self.list_url}?page_size=100")
+        self.assertEqual(response_capped.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_capped.data["results"]), 15)
+
+    def test_search_filter(self):
+        self.client.force_authenticate(user=self.admin)
+
+        # Search by title
+        res_title = self.client.get(f"{self.list_url}?search=General Studies 00")
+        self.assertEqual(res_title.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_title.data["count"], 1)
+
+        # Search by description
+        res_desc = self.client.get(f"{self.list_url}?search=comprehensive general")
+        self.assertEqual(res_desc.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_desc.data["count"], 1)
+
+        # Search by exam name
+        res_exam = self.client.get(f"{self.list_url}?search=State PSC")
+        self.assertEqual(res_exam.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_exam.data["count"], 3)
+
+    def test_exam_filter(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(f"{self.list_url}?exam={self.exam_state.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 3)
+        for item in response.data["results"]:
+            self.assertEqual(item["exam"], self.exam_state.id)
+
+    def test_year_filter(self):
+        self.client.force_authenticate(user=self.admin)
+        response_2024 = self.client.get(f"{self.list_url}?year=2024")
+        self.assertEqual(response_2024.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_2024.data["count"], 6)
+
+        response_2022 = self.client.get(f"{self.list_url}?year=2022")
+        self.assertEqual(response_2022.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_2022.data["count"], 3)
+
+    def test_paper_type_filter(self):
+        self.client.force_authenticate(user=self.admin)
+        response_sol = self.client.get(f"{self.list_url}?paper_type=SOLUTION")
+        self.assertEqual(response_sol.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_sol.data["count"], 3)
+
+        response_qp = self.client.get(f"{self.list_url}?paper_type=QUESTION_PAPER")
+        self.assertEqual(response_qp.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_qp.data["count"], 8)
+
+    def test_published_filter(self):
+        self.client.force_authenticate(user=self.admin)
+        # upsc has 6 published (even indices 0,2,4,6,8,10), state has 3 published. Total = 9
+        res_pub = self.client.get(f"{self.list_url}?is_published=true")
+        self.assertEqual(res_pub.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_pub.data["count"], 9)
+
+        # Inactive = 6
+        res_draft = self.client.get(f"{self.list_url}?is_published=false")
+        self.assertEqual(res_draft.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_draft.data["count"], 6)
+
+    def test_combined_filter(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(
+            f"{self.list_url}?exam={self.exam_upsc.id}&year=2024&is_published=true&page=1&page_size=20"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # In UPSC 2024 (indices 0, 1, 2, 3, 4, 5), published are 0, 2, 4 (3 items)
+        self.assertEqual(response.data["count"], 3)
+        self.assertEqual(len(response.data["results"]), 3)
+

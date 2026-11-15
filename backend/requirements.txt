@@ -1,20 +1,49 @@
+# =============================================================
+# requirements.txt — Mockii backend pinned dependencies
+# =============================================================
+# All versions are pinned to exact releases for reproducibility.
+# To audit for vulnerabilities:
+#   python -m pip_audit -r requirements.txt
+#
+# To check for outdated packages:
+#   pip list --outdated
+#
+# Security policy: pin all direct and indirect dependencies.
+# Upgrade incrementally, one package at a time, and re-run the
+# full test suite after each upgrade.
+# =============================================================
+
+# Core Django
 asgiref==3.12.1
-boto3==1.43.98
-botocore==1.43.98
 Django==6.1.1
-django-cors-headers==4.9.0
-django-storages==1.14.6
+sqlparse==0.6.0
+
+# REST framework & auth
 djangorestframework==3.18.1
 djangorestframework_simplejwt==5.5.1
-jmespath==1.1.0
-pillow==12.3.0
+PyJWT==2.14.0
+
+# Database
 psycopg==3.3.5
 psycopg-binary==3.3.5
-PyJWT==2.14.0
+
+# CORS
+django-cors-headers==4.9.0
+
+# Storage
+django-storages==1.14.6
+boto3==1.43.98
+botocore==1.43.98
+jmespath==1.1.0
+s3transfer==0.19.2
+urllib3==2.8.0
+
+# File handling
+pillow==12.3.0
+openpyxl==3.1.5
+
+# Utilities
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.3
-s3transfer==0.19.2
 six==1.17.0
-sqlparse==0.6.0
 tzdata==2026.4
-urllib3==2.8.0

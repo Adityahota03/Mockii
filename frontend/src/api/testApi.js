@@ -1,12 +1,54 @@
 import api from "./api";
 
-export const getMyAttempts = async () => {
-    const response = await api.get("/tests/my-attempts/");
+export const startTest = async (mockTestId) => {
+    const response = await api.post(`/tests/mock-tests/${mockTestId}/start/`);
+    return response.data;
+};
+
+export const getAttemptDetails = async (attemptId) => {
+    const response = await api.get(`/tests/attempts/${attemptId}/`);
+    return response.data;
+};
+
+export const getMyAttempts = async (params = {}) => {
+    const response = await api.get("/tests/my-attempts/", { params });
     return response.data;
 };
 
 export const getAttemptResult = async (attemptId) => {
-    const response = await api.get(`/tests/my-attempts/${attemptId}/`);
+    try {
+        const response = await api.get(`/tests/attempts/${attemptId}/result/`);
+        return response.data;
+    } catch {
+        // Fallback to my-attempts endpoint if result endpoint has different format
+        const response = await api.get(`/tests/my-attempts/${attemptId}/`);
+        return response.data;
+    }
+};
+
+export const saveAnswer = async (attemptId, questionId, selectedOptionId) => {
+    const response = await api.post(`/tests/attempts/${attemptId}/answer/`, {
+        question_id: questionId,
+        selected_option_id: selectedOptionId,
+    });
+    return response.data;
+};
+
+export const clearAnswer = async (attemptId, questionId) => {
+    const response = await api.post(`/tests/attempts/${attemptId}/answer/`, {
+        question_id: questionId,
+        selected_option_id: null,
+    });
+    return response.data;
+};
+
+export const submitTest = async (attemptId) => {
+    const response = await api.post(`/tests/attempts/${attemptId}/submit/`);
+    return response.data;
+};
+
+export const finalizeTestAttempt = async (attemptId) => {
+    const response = await api.post(`/tests/attempts/${attemptId}/final-submit/`);
     return response.data;
 };
 
@@ -71,13 +113,6 @@ export const toggleQuestionReview = async (attemptId, questionId, marked) => {
     const response = await api.patch(
         `/tests/attempts/${attemptId}/questions/${questionId}/review/`,
         { marked_for_review: marked }
-    );
-    return response.data;
-};
-
-export const finalizeTestAttempt = async (attemptId) => {
-    const response = await api.post(
-        `/tests/attempts/${attemptId}/final-submit/`
     );
     return response.data;
 };

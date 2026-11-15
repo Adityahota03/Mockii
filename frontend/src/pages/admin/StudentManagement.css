@@ -345,39 +345,31 @@
 }
 
 
-/* Pagination */
 
-.student-pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 18px;
-  margin-top: 20px;
-}
 
-.student-pagination button {
-  border: 1px solid #d1d5db;
+.pagination-controls button {
   padding: 8px 14px;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #374151;
-  font-weight: 500;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
   cursor: pointer;
-  transition: background 0.15s ease;
 }
 
-.student-pagination button:hover:not(:disabled) {
-  background: #f9fafb;
-}
-
-.student-pagination button:disabled {
+.pagination-controls button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.student-pagination span {
+.pagination-controls span {
   font-size: 14px;
-  color: #4b5563;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 50px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 15px;
 }
 
 
@@ -490,11 +482,13 @@
 /* Responsive */
 
 @media (max-width: 900px) {
-  .student-stat-grid {
+  .student-stat-grid,
+  .student-summary-grid {
     grid-template-columns: 1fr;
   }
 
-  .student-filter-card {
+  .student-filter-card,
+  .student-filter-container {
     flex-direction: column;
     align-items: stretch;
   }
@@ -504,13 +498,47 @@
   }
 }
 
+@media (max-width: 768px) {
+  .student-summary-grid,
+  .student-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-management-header,
+  .student-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-filter-container,
+  .student-filter-card {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .student-filter-container input,
+  .student-filter-container select,
+  .student-filter-container button,
+  .student-filter-card input,
+  .student-filter-card select,
+  .student-filter-card button {
+    width: 100%;
+  }
+
+  .students-table-wrapper,
+  .table-wrapper {
+    overflow-x: auto;
+  }
+}
+
 
 @media (max-width: 600px) {
   .student-management {
     padding: 16px;
   }
 
-  .student-page-header {
+  .student-page-header,
+  .student-management-header {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -520,6 +548,7 @@
   }
 
   .student-filter-card select,
+  .student-filter-container select,
   .clear-filter-button,
   .student-search-form button {
     width: 100%;
@@ -534,3 +563,4 @@
     text-align: left;
   }
 }
+

@@ -9,6 +9,7 @@ import {
 } from "../../api/adminApi";
 
 import "./StudyMaterialManagement.css";
+import Pagination from "../../components/common/Pagination";
 
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -32,13 +33,27 @@ function StudyMaterialManagement() {
 
   const [loading, setLoading] = useState(false);
 
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [examFilter, setExamFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [publishedFilter, setPublishedFilter] = useState("");
 
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalMaterials, setTotalMaterials] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchInput]);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -74,6 +89,7 @@ function StudyMaterialManagement() {
     try {
       const data = await getAdminStudyMaterials({
         page,
+        page_size: pageSize,
         search: search || undefined,
         exam: examFilter || undefined,
         category: categoryFilter || undefined,
@@ -83,20 +99,25 @@ function StudyMaterialManagement() {
             : undefined,
       });
 
-      setMaterials(data.results || []);
-
-      if (data.count) {
-        setTotalPages(Math.ceil(data.count / 10));
-      } else {
-        setTotalPages(1);
+      if (!data || !Array.isArray(data.results)) {
+        throw new Error("Invalid paginated API response.");
       }
+
+      setMaterials(data.results);
+      setTotalMaterials(Number(data.count) || 0);
+      setTotalPages(
+        Math.max(
+          1,
+          Math.ceil((Number(data.count) || 0) / pageSize)
+        )
+      );
     } catch (err) {
       console.error(err);
       setError("Failed to load study materials.");
     } finally {
       setLoading(false);
     }
-  }, [page, search, examFilter, categoryFilter, publishedFilter]);
+  }, [page, pageSize, search, examFilter, categoryFilter, publishedFilter]);
 
   useEffect(() => {
     loadExams();
@@ -410,6 +431,7 @@ function StudyMaterialManagement() {
 
   const clearFilters = () => {
 
+    setSearchInput("");
     setSearch("");
     setExamFilter("");
     setCategoryFilter("");
@@ -484,11 +506,8 @@ function StudyMaterialManagement() {
         <input
           type="text"
           placeholder="Search materials..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
 
 
@@ -721,31 +740,15 @@ function StudyMaterialManagement() {
       </div>
 
 
-      <div className="pagination">
-
-        <button
-          disabled={page <= 1}
-          onClick={() =>
-            setPage((p) => p - 1)
-          }
-        >
-          Previous
-        </button>
-
-        <span>
-          Page {page} of {totalPages}
-        </span>
-
-        <button
-          disabled={page >= totalPages}
-          onClick={() =>
-            setPage((p) => p + 1)
-          }
-        >
-          Next
-        </button>
-
-      </div>
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalMaterials}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+        loading={loading}
+      />
 
 
       {showModal && (

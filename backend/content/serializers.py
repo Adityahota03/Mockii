@@ -58,6 +58,43 @@ class ExamSerializer(serializers.ModelSerializer):
             "is_featured",
             "created_at",
         ]
+        read_only_fields = [
+            "id",
+            "slug",
+            "category_name",
+            "total_mock_tests",
+            "total_questions",
+            "created_at",
+        ]
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Exam name cannot be empty.")
+        if len(value) < 2:
+            raise serializers.ValidationError("Exam name must contain at least 2 characters.")
+        if len(value) > 150:
+            raise serializers.ValidationError("Exam name cannot exceed 150 characters.")
+        return value
+
+    def validate_category(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("Cannot assign an exam to an inactive category.")
+        return value
+
+    def create(self, validated_data):
+        if not validated_data.get("slug"):
+            base_slug = slugify(validated_data["name"]) or "exam"
+            slug = base_slug
+            counter = 2
+            while Exam.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            validated_data["slug"] = slug
+        return super().create(validated_data)
+
+
+AdminExamSerializer = ExamSerializer
 
 
 class MockTestSerializer(serializers.ModelSerializer):
@@ -115,6 +152,33 @@ class AdminMockTestSerializer(serializers.ModelSerializer):
             "exam_name",
             "created_at",
         ]
+
+    def validate_title(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Mock test title is required.")
+        if len(value) < 3:
+            raise serializers.ValidationError("Mock test title must contain at least 3 characters.")
+        if len(value) > 200:
+            raise serializers.ValidationError("Mock test title cannot exceed 200 characters.")
+        return value
+
+    def validate_duration_minutes(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Duration must be greater than zero.")
+        if value > 1440:
+            raise serializers.ValidationError("Duration cannot exceed 1440 minutes.")
+        return value
+
+    def validate_total_marks(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Total marks cannot be negative.")
+        return value
+
+    def validate_exam(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("Cannot assign a mock test to an inactive exam.")
+        return value
 
     def create(self, validated_data):
         title = validated_data["title"]
@@ -205,6 +269,24 @@ class AdminPreviousYearPaperSerializer(serializers.ModelSerializer):
     def get_file_url(self, obj):
         return get_file_url(obj.file)
 
+    def validate_title(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Title is required.")
+        if len(value) > 250:
+            raise serializers.ValidationError("Title cannot exceed 250 characters.")
+        return value
+
+    def validate_year(self, value):
+        if value < 1900 or value > 2100:
+            raise serializers.ValidationError("Invalid paper year.")
+        return value
+
+    def validate_exam(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("Cannot attach previous year paper to an inactive exam.")
+        return value
+
     def validate_file(self, value):
         try:
             validate_previous_year_paper_file(value)
@@ -220,11 +302,18 @@ class AdminPreviousYearPaperSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         uploaded_file = validated_data.get("file")
+        old_file_name = instance.file.name if instance.file else None
+
         if uploaded_file:
-            if instance.file:
-                instance.file.delete(save=False)
             validated_data["file_size"] = uploaded_file.size
-        return super().update(instance, validated_data)
+
+        instance = super().update(instance, validated_data)
+
+        if uploaded_file and old_file_name and old_file_name != instance.file.name:
+            if instance.file.storage.exists(old_file_name):
+                instance.file.storage.delete(old_file_name)
+
+        return instance
 
 
 class StudentStudyMaterialSerializer(serializers.ModelSerializer):
@@ -302,6 +391,19 @@ class AdminStudyMaterialSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def validate_title(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Title is required.")
+        if len(value) > 250:
+            raise serializers.ValidationError("Title cannot exceed 250 characters.")
+        return value
+
+    def validate_exam(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("Cannot attach study material to an inactive exam.")
+        return value
+
     def validate_file(self, value):
         try:
             validate_study_material_file(value)
@@ -321,11 +423,18 @@ class AdminStudyMaterialSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         uploaded_file = validated_data.get("file")
+        old_file_name = instance.file.name if instance.file else None
 
         if uploaded_file:
             validated_data["file_size"] = uploaded_file.size
 
-        return super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
+
+        if uploaded_file and old_file_name and old_file_name != instance.file.name:
+            if instance.file.storage.exists(old_file_name):
+                instance.file.storage.delete(old_file_name)
+
+        return instance
 
     def get_file_url(self, obj):
         if not obj.file:
@@ -379,6 +488,12 @@ class AdminSectionSerializer(serializers.ModelSerializer):
         read_only=True
     )
     section_order = serializers.IntegerField(source="order")
+    question_count = serializers.SerializerMethodField()
+
+    def get_question_count(self, obj):
+        if hasattr(obj, "calculated_question_count"):
+            return obj.calculated_question_count
+        return getattr(obj, "question_count", 0) or 0
 
     class Meta:
         model = MockTestSection
@@ -404,14 +519,34 @@ class AdminSectionSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Section name is required.")
+        if len(value) > 150:
+            raise serializers.ValidationError("Section name cannot exceed 150 characters.")
+        return value
+
     def validate_duration_minutes(self, value):
         if value is not None and value <= 0:
             raise serializers.ValidationError("Duration must be greater than 0.")
+        if value is not None and value > 1440:
+            raise serializers.ValidationError("Duration cannot exceed 1440 minutes.")
         return value
 
     def validate_section_order(self, value):
         if value < 1:
             raise serializers.ValidationError("Section order must start from 1.")
+        return value
+
+    def validate_total_marks(self, value):
+        if value is not None and value < 0:
+            raise serializers.ValidationError("Total marks cannot be negative.")
+        return value
+
+    def validate_mock_test(self, value):
+        if not value.is_active:
+            raise serializers.ValidationError("Cannot assign a section to an inactive mock test.")
         return value
 
 
@@ -473,6 +608,22 @@ class AdminOptionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id"]
 
+    def validate_option_text(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Option text is required.")
+        if len(value) > 5000:
+            raise serializers.ValidationError("Option text is too long.")
+        return value
+
+    def validate_option_label(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Option label is required.")
+        if len(value) > 5:
+            raise serializers.ValidationError("Option label cannot exceed 5 characters.")
+        return value
+
 
 class AdminQuestionSerializer(serializers.ModelSerializer):
 
@@ -480,6 +631,9 @@ class AdminQuestionSerializer(serializers.ModelSerializer):
         many=True,
         required=False
     )
+
+    option_count = serializers.SerializerMethodField()
+    assigned_count = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Question
@@ -492,14 +646,44 @@ class AdminQuestionSerializer(serializers.ModelSerializer):
             "difficulty",
             "is_active",
             "options",
+            "option_count",
+            "assigned_count",
             "created_at",
             "updated_at",
         ]
         read_only_fields = [
             "id",
+            "option_count",
+            "assigned_count",
             "created_at",
             "updated_at",
         ]
+
+    def get_option_count(self, obj):
+        if hasattr(obj, "options"):
+            return obj.options.count()
+        return 0
+
+    def validate_question_text(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Question text is required.")
+        if len(value) > 10000:
+            raise serializers.ValidationError("Question text is too long.")
+        return value
+
+    def validate_explanation(self, value):
+        value = value.strip()
+        if len(value) > 10000:
+            raise serializers.ValidationError("Explanation is too long.")
+        return value
+
+    def validate_question_type(self, value):
+        value = value.strip().upper()
+        allowed = dict(Question.QUESTION_TYPES).keys()
+        if value not in allowed:
+            raise serializers.ValidationError("Invalid question type.")
+        return value
 
     def validate(self, attrs):
         options = attrs.get("options")
@@ -631,6 +815,19 @@ class AdminMockTestQuestionSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "order": "This question order is already used in this section."
                 })
+
+        marks = attrs.get(
+            "marks",
+            getattr(self.instance, "marks", 1.00)
+        )
+        negative_marks = attrs.get(
+            "negative_marks",
+            getattr(self.instance, "negative_marks", 0.00)
+        )
+        if marks is not None and negative_marks is not None and negative_marks > marks:
+            raise serializers.ValidationError({
+                "negative_marks": "Negative marks cannot exceed question marks."
+            })
 
         return attrs
 

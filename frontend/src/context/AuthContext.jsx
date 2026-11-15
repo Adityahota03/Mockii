@@ -7,7 +7,8 @@ import {
 
 import {
     loginUser,
-    getProfile
+    getProfile,
+    logoutUser
 } from "../services/authService";
 
 
@@ -115,7 +116,15 @@ export const AuthProvider = ({
     /*
         Logout
     */
-    const logout = () => {
+    const logout = async () => {
+        const refreshToken =
+            localStorage.getItem(
+                "refresh_token"
+            );
+
+        if (refreshToken) {
+            await logoutUser(refreshToken);
+        }
 
         localStorage.removeItem(
             "access_token"

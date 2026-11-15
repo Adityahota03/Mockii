@@ -274,26 +274,22 @@ td small {
   color: #6b7280;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-}
-
-.pagination button {
+.clear-btn {
+  padding: 10px 16px;
   border: 1px solid #d1d5db;
-  background: white;
-  padding: 9px 15px;
-  border-radius: 7px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
+  color: #374151;
+  transition: all 0.2s;
+  height: 42px;
 }
 
-.pagination button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.clear-btn:hover {
+  background: #e5e7eb;
 }
+
 
 @media (max-width: 900px) {
   .filters-card {

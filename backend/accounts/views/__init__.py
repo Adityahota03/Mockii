@@ -8,6 +8,9 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from core.throttles import SensitiveActionRateThrottle
 
 from accounts.serializers import (
     RegisterSerializer,
@@ -19,7 +22,12 @@ from accounts.permissions import IsStudent, IsAdmin, IsSuperAdmin
 from accounts.views.admin_students import (
     AdminStudentListAPIView,
     AdminStudentDetailAPIView,
+    AdminStudentStatusAPIView,
 )
+
+import logging
+
+logger = logging.getLogger("mockii.auth")
 
 User = get_user_model()
 
@@ -36,6 +44,7 @@ class RegisterView(APIView):
 
         if serializer.is_valid():
             user = serializer.save()
+            logger.info("User registered successfully: user_id=%s role=%s", user.id, user.role)
 
             return Response(
                 {
@@ -45,6 +54,7 @@ class RegisterView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
+        logger.warning("Registration validation failed: fields=%s", list(serializer.errors.keys()))
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
@@ -57,10 +67,15 @@ class ChangePasswordView(APIView):
         IsAuthenticated
     ]
 
+    throttle_classes = [
+        SensitiveActionRateThrottle
+    ]
+
     def post(self, request):
 
         serializer = ChangePasswordSerializer(
-            data=request.data
+            data=request.data,
+            context={"request": request}
         )
 
         if not serializer.is_valid():
@@ -77,6 +92,7 @@ class ChangePasswordView(APIView):
                 "old_password"
             ]
         ):
+            logger.warning("Password change failed (incorrect current password): user_id=%s", user.id)
 
             return Response(
                 {
@@ -93,6 +109,7 @@ class ChangePasswordView(APIView):
         )
 
         user.save()
+        logger.info("Password changed successfully: user_id=%s", user.id)
 
         return Response(
             {
@@ -201,3 +218,34 @@ class SuperAdminOnlyView(APIView):
                 request.user.role
             }
         )
+
+
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            logger.info("User logged out: user_id=%s", request.user.id if request.user.is_authenticated else None)
+
+            return Response(
+                {"detail": "Logout successful."},
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception:
+            logger.warning("Logout failed (invalid refresh token): user_id=%s", request.user.id if request.user.is_authenticated else None)
+            return Response(
+                {"detail": "Invalid or expired refresh token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+

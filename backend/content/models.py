@@ -43,6 +43,9 @@ class Exam(models.Model):
 
     class Meta:
         ordering = ["name"]
+        indexes = [
+            models.Index(fields=["is_active"]),
+        ]
 
     def __str__(self):
         return self.name
@@ -73,6 +76,10 @@ class MockTest(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["is_published"]),
+            models.Index(fields=["-created_at"]),
+        ]
 
     def __str__(self):
         return self.title
@@ -541,6 +548,11 @@ class PreviousYearPaper(models.Model):
 
     class Meta:
         ordering = ["-year", "-created_at"]
+        indexes = [
+            models.Index(fields=["year"]),
+            models.Index(fields=["is_published"]),
+            models.Index(fields=["-year", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.year}"
@@ -604,6 +616,10 @@ class StudyMaterial(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["is_published"]),
+            models.Index(fields=["-created_at"]),
+        ]
 
     def __str__(self):
         return self.title
