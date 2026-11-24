@@ -47,7 +47,7 @@ textarea { resize: vertical; }
 .loading-state, .empty-state { padding: 50px; text-align: center; color: #6b7280; }
 .empty-state h3 { color: #1f2937; }
 .empty-actions { justify-content: center; }
-.modal-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 23, 42, .55); }
+.modal-overlay { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 23, 42, .55); }
 .modal-container { width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 14px; background: white; box-shadow: 0 25px 60px rgba(0, 0, 0, .2); }
 .question-modal { max-width: 750px; }
 .bank-modal { max-width: 900px; }

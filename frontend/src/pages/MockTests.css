@@ -252,3 +252,27 @@
   display: flex;
   justify-content: center;
 }
+
+@media (max-width: 580px) {
+  .mock-tests-page-container {
+    padding: 20px 14px;
+  }
+  .tests-search-box {
+    min-width: 100%;
+  }
+  .tests-exam-select {
+    width: 100%;
+  }
+  .tests-exam-select select {
+    width: 100%;
+  }
+  .tests-reset-btn {
+    width: 100%;
+  }
+  .test-features-list {
+    grid-template-columns: 1fr;
+  }
+  .action-button-duo {
+    flex-direction: column;
+  }
+}

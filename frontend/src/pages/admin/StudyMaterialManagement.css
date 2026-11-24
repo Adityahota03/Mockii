@@ -164,7 +164,7 @@
   justify-content: center;
 
   padding: 20px;
-  z-index: 1000;
+  z-index: 9000;
 }
 
 .material-modal {

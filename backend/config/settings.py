@@ -504,54 +504,44 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 #     DB_HOST to your PostgreSQL server to enforce TLS in transit.
 
-DATABASES = {
-
-    "default": {
-
-        "ENGINE": "django.db.backends.postgresql",
-
-        "NAME":     os.environ.get("DB_NAME",     "mockii_db"),
-
-        # Use the dedicated least-privilege role (see scripts/db_setup_roles.sql)
-
-        # NEVER use the postgres superuser for the Django application.
-
-        "USER":     os.environ.get("DB_USER",     "mockii_app_login"),
-
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-
-        "HOST":     os.environ.get("DB_HOST",     "localhost"),
-
-        "PORT":     os.environ.get("DB_PORT",     "5432"),
-
-        # Reuse connections for up to 60 s to avoid per-request overhead.
-
-        "CONN_MAX_AGE": 60,
-
-        # Re-validate persistent connections before reuse (Django ≥ 4.1).
-
-        "CONN_HEALTH_CHECKS": True,
-
-        # Production: enforce SSL — uncomment and set DB_SSLMODE=require in .env
-
-        "OPTIONS": {
-            "options": "-c role=mockii_app",
-        },
-
-        # TEST overrides: pytest-django creates/drops the test DB as the
-        # *login* role (mockii_app_login, which has CREATEDB).  The
-        # "-c role=mockii_app" option would switch to the non-CREATEDB
-        # role before Django issues CREATE DATABASE, causing a privilege
-        # error.  Clearing OPTIONS in the TEST block keeps the session
-        # as mockii_app_login for the whole test lifecycle.
-        "TEST": {
-            "NAME": os.environ.get("TEST_DB_NAME", "test_mockii_db"),
-            "OPTIONS": {},
-        },
-
+if os.environ.get("USE_SQLITE", "False").lower() in ("true", "1") or os.environ.get("DB_ENGINE") == "django.db.backends.sqlite3":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME":     os.environ.get("DB_NAME",     "mockii_db"),
+            # Use the dedicated least-privilege role (see scripts/db_setup_roles.sql)
+            # NEVER use the postgres superuser for the Django application.
+            "USER":     os.environ.get("DB_USER",     "mockii_app_login"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "HOST":     os.environ.get("DB_HOST",     "localhost"),
+            "PORT":     os.environ.get("DB_PORT",     "5432"),
+            # Reuse connections for up to 60 s to avoid per-request overhead.
+            "CONN_MAX_AGE": 60,
+            # Re-validate persistent connections before reuse (Django ≥ 4.1).
+            "CONN_HEALTH_CHECKS": True,
+            # Production: enforce SSL — uncomment and set DB_SSLMODE=require in .env
+            "OPTIONS": {
+                "options": "-c role=mockii_app",
+            },
+            # TEST overrides: pytest-django creates/drops the test DB as the
+            # *login* role (mockii_app_login, which has CREATEDB).  The
+            # "-c role=mockii_app" option would switch to the non-CREATEDB
+            # role before Django issues CREATE DATABASE, causing a privilege
+            # error.  Clearing OPTIONS in the TEST block keeps the session
+            # as mockii_app_login for the whole test lifecycle.
+            "TEST": {
+                "NAME": os.environ.get("TEST_DB_NAME", "test_mockii_db"),
+                "OPTIONS": {},
+            },
+        }
+    }
 
 
 
