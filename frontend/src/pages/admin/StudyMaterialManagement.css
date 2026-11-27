@@ -63,15 +63,25 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 6px;
+  background: #0b0f19;
+  color: #ffffff;
+  outline: none;
+}
+
+.filter-panel select option,
+.material-form select option {
+  background: #0b0f19;
+  color: #ffffff;
 }
 
 .material-table-wrapper {
   overflow-x: auto;
-  background: white;
+  background: #0b0f19;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
 }
 
 .material-table {
@@ -82,13 +92,15 @@
 .material-table th,
 .material-table td {
   padding: 13px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   text-align: left;
+  color: #ffffff;
 }
 
 .material-table th {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.04);
   font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .status {
@@ -172,9 +184,11 @@
   max-height: 90vh;
   overflow-y: auto;
 
-  background: white;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   padding: 24px;
+  color: #ffffff;
 }
 
 .modal-header {
@@ -186,6 +200,7 @@
 
 .modal-header h2 {
   margin: 0;
+  color: #ffffff;
 }
 
 .close-btn {
@@ -193,6 +208,7 @@
   background: transparent;
   font-size: 28px;
   cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .material-form {
@@ -206,20 +222,22 @@
   flex-direction: column;
   gap: 7px;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .material-form small {
-  color: #666;
+  color: rgba(255, 255, 255, 0.5);
   font-weight: normal;
 }
 
 .selected-file,
 .existing-file {
   padding: 8px;
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 5px;
   font-size: 13px;
   font-weight: normal;
+  color: #ffffff;
 }
 
 .checkbox-label {

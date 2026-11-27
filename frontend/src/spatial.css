@@ -3592,3 +3592,84 @@ body::after {
     background-size: 200% 100% !important;
     border-radius: 6px !important;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   CONTAINER BOXES & CARDS — BLACK BACKGROUND WITH WHITE TEXT
+─────────────────────────────────────────────────────────────────────────── */
+.container-box,
+.hero-box,
+.previous-papers-hero,
+.previous-paper-card,
+.study-material-card,
+.study-materials-heading,
+.exam-card,
+.mock-test-item-card,
+.test-row-card,
+.history-card,
+.search-result-card,
+.search-idle-state,
+.notif-card,
+.notif-dropdown,
+.student-stat-card,
+.student-filter-card,
+.student-table-card,
+.student-profile-card,
+.detail-section,
+.detail-header-card,
+.detail-description-card,
+.detail-sidebar-card,
+.performance-stat-card,
+.preparation-card,
+.subject-summary-card,
+.chart-card,
+.weak-subject-card,
+.subject-performance-card,
+.mockii-state-container,
+.paper-form-card,
+.filters-card,
+.papers-card,
+.material-table-wrapper,
+.history-table-container,
+.profile-card {
+    background: #0b0f19 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.previous-papers-filters input,
+.previous-papers-filters select,
+.study-material-filters input,
+.study-material-filters select,
+.exams-search-box input,
+.exams-category-select select,
+.tests-search-box input,
+.tests-exam-select select,
+.search-input,
+.filter-select,
+.search-main-input,
+.student-search-form input,
+.student-filter-card select,
+.form-group input,
+.form-group select,
+.form-group textarea,
+.filter-group input,
+.filter-group select,
+.filter-panel input,
+.filter-panel select,
+.profile-field input:not(:disabled) {
+    background-color: #0b0f19 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.clear-filter-button,
+.clear-filter-btn,
+.exams-reset-btn,
+.tests-reset-btn,
+.btn-reset-filters,
+.pagination-controls button,
+.modal-cancel-btn {
+    background: #111e35 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}

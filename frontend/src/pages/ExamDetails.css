@@ -27,7 +27,7 @@
 }
 
 .breadcrumb-current {
-  color: #1e293b;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -116,7 +116,7 @@
 
 .exam-tabs-nav {
   display: flex;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
   gap: 8px;
   margin-bottom: 24px;
   overflow-x: auto;
@@ -128,7 +128,7 @@
   padding: 12px 20px;
   font-size: 1rem;
   font-weight: 600;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
@@ -137,12 +137,12 @@
 }
 
 .exam-tab-btn:hover {
-  color: #0284c7;
+  color: #60a5fa;
 }
 
 .exam-tab-btn.active {
-  color: #0284c7;
-  border-bottom-color: #0284c7;
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
 }
 
 .tab-pane {
@@ -167,21 +167,22 @@
 }
 
 .test-row-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition: border-color 0.2s, box-shadow 0.2s;
+  color: #ffffff;
 }
 
 .test-row-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .test-info-left {
@@ -199,7 +200,7 @@
 .test-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #ffffff;
   margin: 0;
 }
 
@@ -212,26 +213,28 @@
 }
 
 .attempt-badge.in_progress {
-  background: #fef3c7;
-  color: #92400e;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .attempt-badge.submitted {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
 }
 
 .test-meta-pills {
   display: flex;
   gap: 12px;
   font-size: 0.85rem;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7);
   flex-wrap: wrap;
 }
 
 .free-tag {
-  background: #f0fdf4;
-  color: #15803d;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 4px;
@@ -272,13 +275,13 @@
 }
 
 .test-start-btn.outline {
-  background: transparent;
-  color: #0284c7;
-  border: 1px solid #0284c7;
+  background: #111e35;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .test-start-btn.outline:hover {
-  background: #f0f9ff;
+  background: #1e293b;
 }
 
 .materials-list-grid,
@@ -328,13 +331,15 @@
 
 .material-card,
 .paper-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   padding: 16px;
   display: flex;
   align-items: center;
   gap: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .mat-icon {
@@ -342,12 +347,13 @@
 }
 
 .paper-year-badge {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: rgba(37, 99, 235, 0.2);
+  color: #60a5fa;
   font-weight: 700;
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 0.95rem;
+  border: 1px solid rgba(37, 99, 235, 0.35);
 }
 
 .mat-details,
@@ -359,20 +365,20 @@
 .paper-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #ffffff;
   margin: 0 0 4px 0;
 }
 
 .mat-meta,
 .paper-meta {
   font-size: 0.82rem;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
 
 .mat-view-btn,
 .paper-view-btn {
-  color: #0284c7;
+  color: #60a5fa;
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 600;
@@ -385,7 +391,7 @@
 }
 
 .exam-back-link {
-  color: #0284c7;
+  color: #60a5fa;
   text-decoration: none;
   font-weight: 500;
 }

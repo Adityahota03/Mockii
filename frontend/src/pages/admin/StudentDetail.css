@@ -41,10 +41,11 @@
   gap: 20px;
   padding: 24px;
   margin-bottom: 24px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #0b0f19;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .student-profile-avatar {
@@ -56,16 +57,16 @@
   border-radius: 50%;
   font-size: 28px;
   font-weight: 700;
-  background: #e0e7ff;
-  color: #4338ca;
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
   flex-shrink: 0;
-  border: 2px solid #c7d2fe;
+  border: 2px solid rgba(99, 102, 241, 0.4);
 }
 
 .student-profile-info h1 {
   margin: 0 0 4px;
   font-size: 25px;
-  color: #111827;
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -151,10 +152,11 @@
 .detail-section {
   margin-bottom: 24px;
   padding: 22px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #0b0f19;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .section-heading {
@@ -168,12 +170,12 @@
   margin: 0;
   font-size: 19px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
 }
 
 .section-heading span {
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
 }
 
@@ -188,23 +190,23 @@
 
 .account-info-item {
   padding: 14px 16px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  background: #fbfcfd;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .account-info-item span {
   display: block;
   margin-bottom: 6px;
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
 }
 
 .account-info-item strong {
   display: block;
   word-break: break-word;
-  color: #111827;
+  color: #ffffff;
   font-size: 15px;
 }
 
@@ -219,23 +221,23 @@
 
 .activity-stat-card {
   padding: 18px 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .activity-stat-card span {
   display: block;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
 }
 
 .activity-stat-card strong {
   font-size: 26px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
 }
 
 
@@ -245,8 +247,9 @@
 .student-attempts-table-wrapper {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
+  background: #0b0f19;
 }
 
 .attempt-table,
@@ -262,7 +265,7 @@
 .student-attempts-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   white-space: nowrap;
 }
 
@@ -270,8 +273,8 @@
 .student-attempts-table th {
   font-size: 13px;
   font-weight: 700;
-  color: #4b5563;
-  background: #f8fafc;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.04);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -279,7 +282,7 @@
 .attempt-table td,
 .student-attempts-table td {
   font-size: 14px;
-  color: #374151;
+  color: #ffffff;
   vertical-align: middle;
 }
 
@@ -290,7 +293,7 @@
 
 .attempt-table tbody tr:hover,
 .student-attempts-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 
@@ -305,18 +308,18 @@
 }
 
 .attempt-status.submitted {
-  background: #d1e7dd;
-  color: #0f5132;
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
 }
 
 .attempt-status.in_progress {
-  background: #fff3cd;
-  color: #664d03;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
 }
 
 .attempt-status.expired {
-  background: #f8d7da;
-  color: #842029;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
 }
 
 
@@ -327,10 +330,10 @@
   padding: 36px 20px;
   text-align: center;
   border-radius: 10px;
-  background: #f8fafc;
-  color: #6b7280;
+  background: #0b0f19;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 14px;
-  border: 1px dashed #e2e8f0;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
 }
 
 

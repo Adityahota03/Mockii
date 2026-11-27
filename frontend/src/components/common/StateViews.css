@@ -5,11 +5,12 @@
   justify-content: center;
   padding: 48px 24px;
   text-align: center;
-  background: #ffffff;
+  background: #0b0f19;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   margin: 20px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .mockii-state-container.full-page {
@@ -24,12 +25,12 @@
 .mockii-state-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #ffffff;
   margin: 0 0 8px 0;
 }
 
 .mockii-state-msg {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.95rem;
   max-width: 440px;
   margin: 0 0 18px 0;
@@ -39,7 +40,7 @@
 .mockii-spinner {
   width: 42px;
   height: 42px;
-  border: 3.5px solid #e2e8f0;
+  border: 3.5px solid rgba(255, 255, 255, 0.15);
   border-top-color: #0284c7;
   border-radius: 50%;
   animation: mockii-spin 0.8s linear infinite;
@@ -60,7 +61,7 @@
 }
 
 .mockii-skeleton-line {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.05) 75%);
   background-size: 200% 100%;
   animation: mockii-shimmer 1.5s infinite;
   border-radius: 6px;
@@ -91,16 +92,17 @@
 }
 
 .mockii-btn-secondary {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #111e35;
+  color: #ffffff;
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 500;
-  border: 1px solid #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .mockii-btn-secondary:hover {
-  background: #e2e8f0;
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.35);
 }

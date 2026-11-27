@@ -52,10 +52,11 @@
   gap: 8px;
   margin-bottom: 16px;
   padding: 10px;
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   font-size: 0.78rem;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .legend-item {
@@ -194,14 +195,16 @@
 }
 
 .test-modal-card {
-  background: #ffffff;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   max-width: 520px;
   width: 100%;
   padding: 32px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
   animation: modalPop 0.2s ease-out;
+  color: #ffffff;
 }
 
 @keyframes modalPop {
@@ -217,12 +220,12 @@
 
 .test-modal-card h2 {
   font-size: 1.5rem;
-  color: #0f172a;
+  color: #ffffff;
   margin: 0 0 8px 0;
 }
 
 .modal-subtitle {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.95rem;
   margin-bottom: 24px;
 }
@@ -268,14 +271,14 @@
 }
 
 .modal-stat-box.total {
-  background: #f1f5f9;
-  color: #334155;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .modal-warning {
-  background: #fffbeb;
-  border: 1px solid #fef3c7;
-  color: #b45309;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
   font-size: 0.85rem;
   padding: 12px;
   border-radius: 8px;
@@ -293,11 +296,17 @@
   flex: 1;
   padding: 12px;
   border-radius: 8px;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  color: #475569;
+  background: #111e35;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-cancel-btn:hover {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .modal-submit-btn {
@@ -324,9 +333,10 @@
     top: 0;
     bottom: 0;
     width: 320px;
-    background: #ffffff;
+    background: #0b0f19;
+    color: #ffffff;
     z-index: 1000;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.4);
     transition: right 0.3s ease;
     overflow-y: auto;
     padding: 20px;
@@ -437,8 +447,9 @@
     width: min(88vw, 340px);
     padding: 20px;
     overflow-y: auto;
-    background: #ffffff;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    background: #0b0f19;
+    color: #ffffff;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.4);
     transition: right 0.3s ease;
   }
 

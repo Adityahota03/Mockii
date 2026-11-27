@@ -62,14 +62,15 @@
 .student-stat-card {
   padding: 20px;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0b0f19;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .stat-card-label {
   font-size: 14px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -77,7 +78,7 @@
 .stat-card-value {
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
 }
 
 
@@ -90,10 +91,11 @@
   padding: 18px;
   margin-bottom: 20px;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #0b0f19;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .student-search-form {
@@ -108,10 +110,11 @@
 
   padding: 11px 13px;
 
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   font-size: 14px;
-  color: #111827;
+  background: #0b0f19;
+  color: #ffffff;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -153,12 +156,17 @@
 
 .student-filter-card select {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  background: #ffffff;
-  color: #374151;
+  background: #0b0f19;
+  color: #ffffff;
   font-size: 14px;
   outline: none;
+}
+
+.student-filter-card select option {
+  background: #0b0f19;
+  color: #ffffff;
 }
 
 .student-filter-card select:focus {
@@ -172,21 +180,22 @@
   padding: 13px 16px;
   margin-bottom: 20px;
   border-radius: 8px;
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
   font-size: 14px;
-  border: 1px solid #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 
 /* Table */
 
 .student-table-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
 }
 
 .table-header {
@@ -194,19 +203,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 18px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .table-header h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: #ffffff;
 }
 
 .table-header span {
   font-size: 14px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 
@@ -225,26 +234,26 @@
 .student-table td {
   padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .student-table th {
   font-size: 13px;
   font-weight: 700;
-  color: #4b5563;
-  background: #f8fafc;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.04);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
 
 .student-table td {
   font-size: 14px;
-  color: #374151;
+  color: #ffffff;
   vertical-align: middle;
 }
 
 .student-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 
@@ -349,9 +358,10 @@
 
 .pagination-controls button {
   padding: 8px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 6px;
-  background: white;
+  background: #111e35;
+  color: #ffffff;
   cursor: pointer;
 }
 
@@ -368,7 +378,7 @@
 .empty-state {
   padding: 50px 20px;
   text-align: center;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
 }
 
@@ -382,8 +392,8 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   z-index: 9000;
 }
 
@@ -392,9 +402,11 @@
   max-width: 550px;
   max-height: 90vh;
   overflow-y: auto;
-  background: #ffffff;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 14px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
 }
 
 .student-modal-header {
@@ -402,14 +414,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .student-modal-header h2 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
 }
 
 .modal-close-button {
@@ -417,13 +429,13 @@
   background: transparent;
   font-size: 28px;
   line-height: 1;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   transition: color 0.15s ease;
 }
 
 .modal-close-button:hover {
-  color: #111827;
+  color: #ffffff;
 }
 
 
