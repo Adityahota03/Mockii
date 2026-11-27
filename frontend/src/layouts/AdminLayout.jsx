@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import NotificationBell from "../components/NotificationBell";
 import { useAuth } from "../context/AuthContext";
@@ -13,8 +14,10 @@ function AdminLayout({ children }) {
             <main className="main-content">
                 <header className="topbar">
                     <div className="topbar-brand">
-                        <span className="brand-dot" style={{ backgroundColor: "#3b82f6" }}></span>
-                        <span>Mockii Admin Portal</span>
+                        <Link to="/" className="topbar-home-link" title="Back to Home Page">
+                            <span className="brand-dot" style={{ backgroundColor: "#3b82f6" }}></span>
+                            <span>Mockii Admin Portal</span>
+                        </Link>
                         <span className="role-pill" style={{
                             fontSize: "0.75rem",
                             padding: "0.2rem 0.6rem",

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 
 
@@ -17,8 +18,10 @@ function SuperAdminLayout({
 
                 <header className="topbar">
 
-                    <div>
-                        Mockii Super Admin
+                    <div className="topbar-brand">
+                        <Link to="/" className="topbar-home-link" title="Back to Home Page">
+                            <span className="brand-dot"></span> Mockii Super Admin
+                        </Link>
                     </div>
 
                     <div>

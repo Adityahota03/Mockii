@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import NotificationBell from "../components/NotificationBell";
 
@@ -19,7 +20,9 @@ function StudentLayout({
                 <header className="topbar">
 
                     <div className="topbar-brand">
-                        <span className="brand-dot"></span> Mockii Student Portal
+                        <Link to="/" className="topbar-home-link" title="Back to Home Page">
+                            <span className="brand-dot"></span> Mockii Student Portal
+                        </Link>
                     </div>
 
                     <div className="topbar-actions">

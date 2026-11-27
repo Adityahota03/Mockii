@@ -5,8 +5,9 @@
   justify-content: center;
 }
 
+.notif-bell-btn,
 .notif-bell-button {
-  background: none;
+  background: transparent;
   border: none;
   padding: 0.5rem;
   border-radius: 50%;
@@ -16,13 +17,15 @@
   justify-content: center;
   position: relative;
   transition: background-color 0.2s;
-  color: inherit;
+  color: var(--text-main, #f8fafc);
 }
 
+.notif-bell-btn:hover,
 .notif-bell-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.bell-svg,
 .bell-icon {
   width: 1.25rem;
   height: 1.25rem;

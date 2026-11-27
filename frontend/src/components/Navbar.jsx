@@ -12,7 +12,7 @@ function Navbar() {
 
     const getDashboardPath = () => {
         if (!user) return "/login";
-        if (user.role === "SUPER_ADMIN") return "/superadmin/dashboard";
+        if (user.role === "SUPER_ADMIN") return "/super-admin/dashboard";
         if (user.role === "ADMIN") return "/admin/dashboard";
         return "/student/dashboard";
     };

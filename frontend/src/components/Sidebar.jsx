@@ -1,4 +1,5 @@
 import {
+    Link,
     NavLink
 } from "react-router-dom";
 
@@ -247,7 +248,12 @@ function Sidebar({
             className={`sidebar${isOpen ? " is-open" : ""}`}
         >
 
-            <div className="sidebar-logo">
+            <Link
+                to="/"
+                className="sidebar-logo"
+                onClick={closeSidebar}
+                title="Back to Home Page"
+            >
 
                 <div className="logo-icon">
                     🎓
@@ -263,7 +269,7 @@ function Sidebar({
                     </span>
                 </div>
 
-            </div>
+            </Link>
 
 
             <nav className="sidebar-nav">
